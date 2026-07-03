@@ -35,12 +35,13 @@ updates itself from new releases here.
 ## Development
 
 ```bash
+cp .env.example .env   # required to exist (it's a declared asset); fill in or leave as-is
 flutter pub get
 flutter run
 ```
 
-- Optional: create a `.env` (see `.env.example`) so onboarding screens offer a one-tap
-  dev fill of your HA URL/token. It is gitignored and never ships.
+- `.env` lets onboarding screens offer a one-tap dev fill of your HA URL/token. It is
+  gitignored and never committed.
 - `tool/` holds host-side sanity checks that run against a real HA instance
   (`dart run tool/provision_check.dart`, `tool/esphome_proxy_check.dart`, …).
 

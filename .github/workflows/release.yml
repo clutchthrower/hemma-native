@@ -58,6 +58,10 @@ jobs:
           storeFile=keys/hemma-release.jks
           EOF
 
+      # pubspec lists .env as an asset (dev-only convenience, gitignored) —
+      # the build needs the file to exist, empty is fine.
+      - run: touch .env
+
       - run: flutter pub get
 
       - run: flutter test
