@@ -1,0 +1,58 @@
+# Hemma Native
+
+A fast, native Android dashboard for [Home Assistant](https://www.home-assistant.io/),
+built for old wall-mounted tablets. It recreates the calm, Apple-Home-inspired look of the
+[willsanderson/Hemma](https://github.com/willsanderson/Hemma) Lovelace dashboard as a
+compiled Flutter app — no WebView, no browser, no per-frame blur — so it stays smooth on
+hardware as old as Android 7.0 (API 24).
+
+## Features
+
+- **Looks like Hemma**: blurred room photos, big room titles, badge pills, bottom card
+  strip, room-name tab navigation — day/night backgrounds switch with the sun.
+- **Zero-typing onboarding**: scans the LAN for Home Assistant (mDNS), signs in with your
+  HA username/password (no token copy-paste), auto-creates rooms from your HA Areas, and
+  registers the tablet as a device in HA (`mobile_app`).
+- **Homescreen-style editing**: long-press any card, badge, or title to enter edit mode —
+  add/remove/rename cards and badges, set per-room backgrounds (bundled photos or your own),
+  all saved instantly.
+- **Whole-home view**: aggregated badges plus auto-derived cards for thermostats, locks,
+  vacuums, pending updates, and battery levels.
+- **Bluetooth proxy**: optionally relays nearby BLE advertisements to Home Assistant using
+  the ESPHome native API — HA discovers the tablet on *Devices & services* like any
+  ESPHome Bluetooth proxy.
+- **Wall-tablet niceties**: fullscreen mode, launcher (home-app) mode, screensaver with
+  clock/weather and burn-in protection (including a DVD-logo bounce), device brightness
+  control, and in-app updates from GitHub Releases.
+
+## Install
+
+Grab the APK from the [latest release](../../releases/latest) and sideload it
+(enable *Install unknown apps* for your browser/file manager). On first launch the app
+finds Home Assistant on your Wi-Fi and walks you through sign-in. Once installed, the app
+updates itself from new releases here.
+
+## Development
+
+```bash
+flutter pub get
+flutter run
+```
+
+- Optional: create a `.env` (see `.env.example`) so onboarding screens offer a one-tap
+  dev fill of your HA URL/token. It is gitignored and never ships.
+- `tool/` holds host-side sanity checks that run against a real HA instance
+  (`dart run tool/provision_check.dart`, `tool/esphome_proxy_check.dart`, …).
+
+### Releasing
+
+1. Bump `version:` in `pubspec.yaml` (e.g. `1.1.0+2`).
+2. `flutter build apk --release` (signing config comes from the untracked
+   `android/key.properties`).
+3. Create a GitHub release tagged `v1.1.0` with the APK attached. Tablets show a blocking
+   update screen within 6 hours.
+
+## Credits
+
+Design, icons, fonts, and demo photos adapted from
+[willsanderson/Hemma](https://github.com/willsanderson/Hemma) (MIT) — see `NOTICE.md`.

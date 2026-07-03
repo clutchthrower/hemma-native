@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Behind the Flutter UI once running: dark, so orientation changes and
+     first-frame gaps never flash white. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#19191F" />
+</shape>
