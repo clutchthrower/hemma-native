@@ -127,16 +127,19 @@ class EntityGrid extends StatelessWidget {
       final tile = KotiTokens.tileSizeMobilePortrait;
       final gutter = mode == DeviceMode.mobile ? tokens.pageGutterMobile : size.width * 0.04;
       final itemCount = cards.length + (editing ? 1 : 0);
+      // Cards scrolling up used to vanish at a hard line below the room
+      // title; an alpha-gradient mask fades them out over [fadeExtent]
+      // instead (a single static gradient shader — cheap on old GPUs,
+      // unlike blur). The fade zone is carved out of the space ABOVE the
+      // resting grid position, so unscrolled cards sit fully opaque just
+      // below it and only start dissolving once they scroll into it.
+      const fadeExtent = 48.0;
       return Padding(
         padding: EdgeInsets.only(
-          top: tokens.tilesTopPortrait,
+          top: tokens.tilesTopPortrait - fadeExtent,
           left: gutter,
           right: gutter,
         ),
-        // Cards scrolling up used to vanish at a hard line below the room
-        // title; this alpha-gradient mask fades them out over the top
-        // ~48px instead. A single static gradient shader — cheap on old
-        // GPUs, unlike blur.
         child: ShaderMask(
           shaderCallback: (rect) => LinearGradient(
             begin: Alignment.topCenter,
@@ -145,11 +148,11 @@ class EntityGrid extends StatelessWidget {
               Colors.transparent,
               Colors.white,
             ],
-            stops: [0.0, (48.0 / rect.height).clamp(0.0, 1.0)],
+            stops: [0.0, (fadeExtent / rect.height).clamp(0.0, 1.0)],
           ).createShader(rect),
           blendMode: BlendMode.dstIn,
           child: GridView.builder(
-            padding: const EdgeInsets.only(top: 8, bottom: 40),
+            padding: const EdgeInsets.only(top: fadeExtent + 8, bottom: 40),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               mainAxisSpacing: 8,
