@@ -51,7 +51,7 @@ Color colorForHumidity(double percent) =>
 
 /// Base Hemma color palette (`themes/hemma/hemma.yaml`), exposed for badges
 /// and popups that reference a named accent rather than a threshold color.
-class HemmaPalette {
+class KotiPalette {
   static const blue = Color(0xFF007AFF);
   static const teal = Color(0xFF00C3D0);
   static const yellow = Color(0xFFFFCC00);

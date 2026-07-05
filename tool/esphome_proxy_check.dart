@@ -11,7 +11,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
-import 'package:hemma_native/api/esphome_server.dart';
+import 'package:koti/api/esphome_server.dart';
 
 Future<void> main() async {
   final env = <String, String>{};
@@ -26,7 +26,7 @@ Future<void> main() async {
   };
 
   final server = EsphomeServer(
-    name: 'hemma-proxy-test',
+    name: 'koti-proxy-test',
     friendlyName: 'Hemma Proxy Test',
     macAddress: '02:11:22:33:44:55',
     bluetoothMacAddress: '02:11:22:33:44:56',

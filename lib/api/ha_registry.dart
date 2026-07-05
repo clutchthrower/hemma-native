@@ -133,11 +133,11 @@ class RoomAutoProvisioner {
 
         final cards = <CardConfig>[
           for (final id in lights)
-            CardConfig(id: 'auto-$id', type: HemmaCardType.light, entityId: id),
+            CardConfig(id: 'auto-$id', type: KotiCardType.light, entityId: id),
           for (final id in mediaPlayers)
-            CardConfig(id: 'auto-$id', type: HemmaCardType.media, entityId: id),
+            CardConfig(id: 'auto-$id', type: KotiCardType.media, entityId: id),
           for (final id in cameras)
-            CardConfig(id: 'auto-$id', type: HemmaCardType.camera, entityId: id),
+            CardConfig(id: 'auto-$id', type: KotiCardType.camera, entityId: id),
         ];
 
         rooms.add(RoomConfig(

@@ -52,7 +52,7 @@ class MotionCard extends StatelessWidget {
           });
         }
 
-        return HemmaEntityCard(
+        return KotiEntityCard(
           iconName: 'motion',
           label: 'Motion',
           stateText: label,

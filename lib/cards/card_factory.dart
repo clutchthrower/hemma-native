@@ -26,71 +26,71 @@ import 'vacuum_card.dart';
 /// its concrete card widget.
 Widget buildEntityCard(CardConfig config, int position) {
   switch (config.type) {
-    case HemmaCardType.light:
+    case KotiCardType.light:
       return LightCard(
         entityId: config.entityId,
         label: config.labelOverride,
         position: position,
       );
-    case HemmaCardType.thermostat:
+    case KotiCardType.thermostat:
       return ThermostatCard(
         entityId: config.entityId,
         tempSensorEntityId: config.extraEntityIds.isNotEmpty ? config.extraEntityIds.first : null,
         label: config.labelOverride,
         position: position,
       );
-    case HemmaCardType.fan:
+    case KotiCardType.fan:
       return FanCard(
           entityId: config.entityId, label: config.labelOverride, position: position);
-    case HemmaCardType.humidifier:
+    case KotiCardType.humidifier:
       return HumidifierCard(entityId: config.entityId, position: position);
-    case HemmaCardType.airPurifier:
+    case KotiCardType.airPurifier:
       return AirPurifierCard(entityId: config.entityId, position: position);
-    case HemmaCardType.media:
+    case KotiCardType.media:
       return MediaCard(
           entityId: config.entityId, label: config.labelOverride, position: position);
-    case HemmaCardType.lock:
+    case KotiCardType.lock:
       return LockCard(
           entityId: config.entityId, label: config.labelOverride, position: position);
-    case HemmaCardType.motion:
+    case KotiCardType.motion:
       return MotionCard(
         sensorEntityIds: [config.entityId, ...config.extraEntityIds],
         position: position,
       );
-    case HemmaCardType.doorbell:
+    case KotiCardType.doorbell:
       return DoorbellCard(
           entityId: config.entityId, label: config.labelOverride, position: position);
-    case HemmaCardType.camera:
+    case KotiCardType.camera:
       return CameraCard(
           entityId: config.entityId, label: config.labelOverride, position: position);
-    case HemmaCardType.vacuum:
+    case KotiCardType.vacuum:
       return VacuumCard(
           entityId: config.entityId, label: config.labelOverride, position: position);
-    case HemmaCardType.curtain:
+    case KotiCardType.curtain:
       return CurtainCard(
           entityId: config.entityId, label: config.labelOverride, position: position);
-    case HemmaCardType.energy:
+    case KotiCardType.energy:
       return EnergyCard(powerSensorEntityId: config.entityId, position: position);
-    case HemmaCardType.network:
+    case KotiCardType.network:
       return NetworkCard(
         downloadSensorEntityId: config.entityId,
         uploadSensorEntityId: config.extraEntityIds.isNotEmpty ? config.extraEntityIds.first : null,
         pingSensorEntityId: config.extraEntityIds.length > 1 ? config.extraEntityIds[1] : null,
         position: position,
       );
-    case HemmaCardType.battery:
+    case KotiCardType.battery:
       return BatteryCard(
         entityFilter: config.extraEntityIds.isNotEmpty ? config.extraEntityIds : null,
         position: position,
       );
-    case HemmaCardType.updates:
+    case KotiCardType.updates:
       return UpdatesCard(position: position);
-    case HemmaCardType.plant:
+    case KotiCardType.plant:
       return PlantCard(plantEntityId: config.entityId, position: position);
-    case HemmaCardType.custom:
+    case KotiCardType.custom:
       final raw = config.customSpec;
       if (raw == null) {
-        return HemmaEntityCard(
+        return KotiEntityCard(
           iconName: 'home',
           label: config.labelOverride ?? 'Custom card',
           stateText: 'Not configured',

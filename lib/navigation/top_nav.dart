@@ -5,7 +5,7 @@ import '../models/room_config.dart';
 /// The original dashboard's navigation: a row of text tabs across the top
 /// — Home, then each room by name, then "Scenes ⌄" — inside a translucent
 /// pill (tablet style). The selected tab gets a lighter pill highlight.
-class HemmaTopNav extends StatelessWidget {
+class KotiTopNav extends StatelessWidget {
   final List<RoomConfig> rooms;
 
   /// Selected room id, or null when the Home tab is active.
@@ -15,7 +15,7 @@ class HemmaTopNav extends StatelessWidget {
   final ValueChanged<RoomConfig?> onSelect;
   final VoidCallback onScenes;
 
-  const HemmaTopNav({
+  const KotiTopNav({
     super.key,
     required this.rooms,
     required this.selectedRoomId,

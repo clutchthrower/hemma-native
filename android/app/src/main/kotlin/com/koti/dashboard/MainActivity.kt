@@ -1,4 +1,4 @@
-package com.hemma.hemma_native
+package com.koti.dashboard
 
 import android.Manifest
 import android.bluetooth.BluetoothManager
@@ -107,7 +107,7 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
-        EventChannel(flutterEngine.dartExecutor.binaryMessenger, "hemma/ble")
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, "koti/ble")
             .setStreamHandler(object : EventChannel.StreamHandler {
                 override fun onListen(args: Any?, sink: EventChannel.EventSink?) {
                     bleSink = sink
@@ -118,7 +118,7 @@ class MainActivity : FlutterActivity() {
                 }
             })
 
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "hemma/native")
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "koti/native")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     // Opens the system's home-app picker so the user can set

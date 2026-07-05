@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../widgets/entity_watcher.dart';
 import 'popup_base.dart';
 
 void showPlantPopup(BuildContext context, String plantEntityId) {
-  showHemmaPopup(
+  showKotiPopup(
     context,
     title: 'Plant',
     builder: (context) => EntityWatcher(
       entityIds: [plantEntityId],
       builder: (context, states) {
-        final tokens = HemmaTheme.of(context);
+        final tokens = KotiTheme.of(context);
         final entity = states[plantEntityId];
         final sensors = {
           'Moisture': entity?.attributes['moisture'],

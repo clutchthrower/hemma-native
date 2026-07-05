@@ -9,7 +9,7 @@ import '../screens/home_overview_screen.dart';
 import '../screens/update_screen.dart';
 import '../store/settings_store.dart';
 import '../store/state_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../screens/settings/connection_settings_page.dart';
 import '../screens/settings/display_settings_page.dart';
 import '../screens/settings/room_edit_page.dart';
@@ -61,7 +61,7 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     final settings = Provider.of<SettingsStore>(context, listen: false);
 
     return Drawer(
@@ -169,7 +169,7 @@ class _DrawerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -278,7 +278,7 @@ class _UpdateItemState extends State<_UpdateItem> {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
 
     if (_available != null) {
       return _DrawerItem(
@@ -320,7 +320,7 @@ class _VersionFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(22, 8, 22, 16),
       child: FutureBuilder<PackageInfo>(

@@ -15,7 +15,7 @@ enum ThermostatMode { cool, heat }
 /// of its own to host them.
 class HelperStore extends ChangeNotifier {
   final StateStore stateStore;
-  static const _prefsPrefix = 'hemma_helper_';
+  static const _prefsPrefix = 'koti_helper_';
 
   HelperStore({required this.stateStore}) {
     stateStore.addListener(_onStateStoreChanged);

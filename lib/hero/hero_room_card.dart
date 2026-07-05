@@ -12,7 +12,7 @@ import '../edit/edit_mode.dart';
 import '../models/room_config.dart';
 import '../popups/climate_popup.dart';
 import '../store/settings_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../utils/device_mode.dart';
 import '../widgets/entity_watcher.dart';
 import '../widgets/media_pill.dart';
@@ -231,7 +231,7 @@ class _HeroRoomCardState extends State<HeroRoomCard>
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     final settings = Provider.of<SettingsStore>(context, listen: false);
     final mode = deviceModeFor(context);
     final portrait = isPortrait(context);

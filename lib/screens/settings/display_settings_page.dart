@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 
-import '../../theme/hemma_theme.dart';
+import '../../theme/koti_theme.dart';
 import '../../theme/tokens.dart';
 
 /// Physical-screen settings for an always-mounted tablet: brightness,
@@ -157,7 +157,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
             subtitle: const Text(
                 'Opens Android\'s home-app picker — choose Koti to make the tablet boot straight into the dashboard. Pick your old launcher there to undo.'),
             trailing: const Icon(Icons.open_in_new, size: 18),
-            onTap: () => const MethodChannel('hemma/native')
+            onTap: () => const MethodChannel('koti/native')
                 .invokeMethod('openHomeSettings'),
           ),
         ],

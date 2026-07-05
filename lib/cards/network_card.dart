@@ -45,7 +45,7 @@ class NetworkCard extends StatelessWidget {
         final maxSpeed = down > up ? down : up;
         final label = down >= up ? 'Download' : 'Upload';
 
-        return HemmaEntityCard(
+        return KotiEntityCard(
           iconName: 'wifi',
           label: 'Network',
           stateText: '$label ${maxSpeed.toStringAsFixed(1)} Mbps',

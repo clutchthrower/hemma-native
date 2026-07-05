@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../popups/popup_base.dart';
 import '../store/state_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../widgets/entity_watcher.dart';
 import 'base_entity_card.dart';
 
@@ -26,7 +26,7 @@ class CurtainCard extends StatelessWidget {
         final positionPct = entity?.attrDouble('current_position');
         final name =
             label ?? entity?.attr<String>('friendly_name', entityId) ?? entityId;
-        return HemmaEntityCard(
+        return KotiEntityCard(
           iconName: open ? 'curtain-open' : 'curtain-closed',
           label: name,
           stateText: positionPct != null
@@ -35,7 +35,7 @@ class CurtainCard extends StatelessWidget {
           active: open,
           position: position,
           progress: positionPct != null ? positionPct / 100 : null,
-          onTap: () => showHemmaPopup(
+          onTap: () => showKotiPopup(
             context,
             title: name,
             builder: (context) => _CoverControls(entityId: entityId),
@@ -59,7 +59,7 @@ class _CoverControlsState extends State<_CoverControls> {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     final store = Provider.of<StateStore>(context, listen: false);
 
     void call(String service, [Map<String, dynamic>? data]) =>

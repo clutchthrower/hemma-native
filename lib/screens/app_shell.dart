@@ -9,7 +9,7 @@ import '../navigation/top_nav.dart';
 import '../popups/scenes_popup.dart';
 import '../store/settings_store.dart';
 import '../store/state_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/clock_widget.dart';
 import 'home_overview_screen.dart';
@@ -154,7 +154,7 @@ class _AppShellState extends State<AppShell> {
                                 ),
                                 Expanded(
                                   child: Center(
-                                    child: HemmaTopNav(
+                                    child: KotiTopNav(
                                       rooms: rooms,
                                       selectedRoomId: _roomId,
                                       onSelect: (room) =>

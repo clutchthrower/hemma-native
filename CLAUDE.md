@@ -1,4 +1,4 @@
-# Project Context: Hemma Native (Ultra-Low RAM Dashboard App)
+# Project Context: Koti (Ultra-Low RAM Dashboard App, formerly "Hemma Native")
 
 ## Overview
 This project converts the visual identity and minimalist layout of the [willsanderson/Hemma](https://github.com) Home Assistant dashboard into a highly optimized, compiled native Android application. 

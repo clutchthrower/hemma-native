@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../popups/popup_base.dart';
 import '../store/state_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../widgets/entity_watcher.dart';
 import 'base_entity_card.dart';
 
@@ -43,7 +43,7 @@ class ThermostatCard extends StatelessWidget {
         final name =
             label ?? climate?.attr<String>('friendly_name', entityId) ?? entityId;
 
-        return HemmaEntityCard(
+        return KotiEntityCard(
           iconName: 'thermostat',
           label: name,
           stateText: currentTemp != null
@@ -51,7 +51,7 @@ class ThermostatCard extends StatelessWidget {
               : (climate?.state ?? 'Off'),
           active: active,
           position: position,
-          onTap: () => showHemmaPopup(
+          onTap: () => showKotiPopup(
             context,
             title: name,
             builder: (context) => _ThermostatOverlay(entityId: entityId, store: store),
@@ -99,7 +99,7 @@ class _ThermostatOverlayState extends State<_ThermostatOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
 
     return EntityWatcher(
       entityIds: [widget.entityId],

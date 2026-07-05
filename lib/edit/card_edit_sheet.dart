@@ -9,47 +9,47 @@ import '../widgets/entity_picker.dart';
 
 /// Human-readable names for card types, used everywhere card types are
 /// shown to the user (edit sheets, room settings).
-String cardTypeLabel(HemmaCardType type) => switch (type) {
-      HemmaCardType.light => 'Light',
-      HemmaCardType.thermostat => 'Thermostat',
-      HemmaCardType.fan => 'Fan',
-      HemmaCardType.humidifier => 'Humidifier',
-      HemmaCardType.airPurifier => 'Air Purifier',
-      HemmaCardType.media => 'Media Player',
-      HemmaCardType.lock => 'Lock',
-      HemmaCardType.motion => 'Motion Sensor',
-      HemmaCardType.doorbell => 'Doorbell',
-      HemmaCardType.camera => 'Camera',
-      HemmaCardType.vacuum => 'Vacuum',
-      HemmaCardType.curtain => 'Curtain / Cover',
-      HemmaCardType.energy => 'Energy Usage',
-      HemmaCardType.network => 'Network',
-      HemmaCardType.battery => 'Battery Levels',
-      HemmaCardType.updates => 'Updates',
-      HemmaCardType.plant => 'Plant',
-      HemmaCardType.custom => 'Custom',
+String cardTypeLabel(KotiCardType type) => switch (type) {
+      KotiCardType.light => 'Light',
+      KotiCardType.thermostat => 'Thermostat',
+      KotiCardType.fan => 'Fan',
+      KotiCardType.humidifier => 'Humidifier',
+      KotiCardType.airPurifier => 'Air Purifier',
+      KotiCardType.media => 'Media Player',
+      KotiCardType.lock => 'Lock',
+      KotiCardType.motion => 'Motion Sensor',
+      KotiCardType.doorbell => 'Doorbell',
+      KotiCardType.camera => 'Camera',
+      KotiCardType.vacuum => 'Vacuum',
+      KotiCardType.curtain => 'Curtain / Cover',
+      KotiCardType.energy => 'Energy Usage',
+      KotiCardType.network => 'Network',
+      KotiCardType.battery => 'Battery Levels',
+      KotiCardType.updates => 'Updates',
+      KotiCardType.plant => 'Plant',
+      KotiCardType.custom => 'Custom',
     };
 
 /// Which entity domains fit each card type (null = no entity needed).
-List<String>? cardTypeDomains(HemmaCardType type) => switch (type) {
-      HemmaCardType.light => const ['light'],
-      HemmaCardType.thermostat => const ['climate'],
-      HemmaCardType.fan => const ['fan'],
-      HemmaCardType.humidifier => const ['humidifier'],
-      HemmaCardType.airPurifier => const ['fan', 'humidifier'],
-      HemmaCardType.media => const ['media_player'],
-      HemmaCardType.lock => const ['lock'],
-      HemmaCardType.motion => const ['binary_sensor'],
-      HemmaCardType.doorbell => const ['binary_sensor', 'camera'],
-      HemmaCardType.camera => const ['camera'],
-      HemmaCardType.vacuum => const ['vacuum'],
-      HemmaCardType.curtain => const ['cover'],
-      HemmaCardType.energy => const ['sensor'],
-      HemmaCardType.network => const ['sensor'],
-      HemmaCardType.battery => null,
-      HemmaCardType.updates => null,
-      HemmaCardType.plant => const ['plant'],
-      HemmaCardType.custom => null,
+List<String>? cardTypeDomains(KotiCardType type) => switch (type) {
+      KotiCardType.light => const ['light'],
+      KotiCardType.thermostat => const ['climate'],
+      KotiCardType.fan => const ['fan'],
+      KotiCardType.humidifier => const ['humidifier'],
+      KotiCardType.airPurifier => const ['fan', 'humidifier'],
+      KotiCardType.media => const ['media_player'],
+      KotiCardType.lock => const ['lock'],
+      KotiCardType.motion => const ['binary_sensor'],
+      KotiCardType.doorbell => const ['binary_sensor', 'camera'],
+      KotiCardType.camera => const ['camera'],
+      KotiCardType.vacuum => const ['vacuum'],
+      KotiCardType.curtain => const ['cover'],
+      KotiCardType.energy => const ['sensor'],
+      KotiCardType.network => const ['sensor'],
+      KotiCardType.battery => null,
+      KotiCardType.updates => null,
+      KotiCardType.plant => const ['plant'],
+      KotiCardType.custom => null,
     };
 
 /// Result of [showCardEditSheet]: either a card to save, or a deletion.
@@ -84,7 +84,7 @@ class _CardEditSheet extends StatefulWidget {
 }
 
 class _CardEditSheetState extends State<_CardEditSheet> {
-  late HemmaCardType _type;
+  late KotiCardType _type;
   String? _entityId;
   late final TextEditingController _label;
   late final TextEditingController _spec;
@@ -94,7 +94,7 @@ class _CardEditSheetState extends State<_CardEditSheet> {
   @override
   void initState() {
     super.initState();
-    _type = widget.existing?.type ?? HemmaCardType.light;
+    _type = widget.existing?.type ?? KotiCardType.light;
     _entityId =
         (widget.existing?.entityId.isEmpty ?? true) ? null : widget.existing!.entityId;
     _label = TextEditingController(text: widget.existing?.labelOverride ?? '');
@@ -115,7 +115,7 @@ class _CardEditSheetState extends State<_CardEditSheet> {
   }
 
   void _validateSpec() {
-    if (_type != HemmaCardType.custom) return;
+    if (_type != KotiCardType.custom) return;
     if (_spec.text.trim().isEmpty) {
       _specError = null;
       _specWarnings = const [];
@@ -131,7 +131,7 @@ class _CardEditSheetState extends State<_CardEditSheet> {
   }
 
   Map<String, dynamic>? get _parsedSpec {
-    if (_type != HemmaCardType.custom || _spec.text.trim().isEmpty) return null;
+    if (_type != KotiCardType.custom || _spec.text.trim().isEmpty) return null;
     try {
       return CustomCardSpec.parse(_spec.text).toJson();
     } on FormatException {
@@ -140,7 +140,7 @@ class _CardEditSheetState extends State<_CardEditSheet> {
   }
 
   bool get _canSave {
-    if (_type == HemmaCardType.custom) {
+    if (_type == KotiCardType.custom) {
       return _spec.text.trim().isNotEmpty && _specError == null;
     }
     return _entityId != null || cardTypeDomains(_type) == null;
@@ -198,14 +198,14 @@ class _CardEditSheetState extends State<_CardEditSheet> {
           Text(isNew ? 'Add Card' : 'Edit Card',
               style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 16),
-          DropdownButtonFormField<HemmaCardType>(
+          DropdownButtonFormField<KotiCardType>(
             initialValue: _type,
             decoration: const InputDecoration(
               labelText: 'Card type',
               border: OutlineInputBorder(),
             ),
             items: [
-              for (final t in HemmaCardType.values)
+              for (final t in KotiCardType.values)
                 DropdownMenuItem(value: t, child: Text(cardTypeLabel(t))),
             ],
             onChanged: (v) => setState(() {
@@ -215,7 +215,7 @@ class _CardEditSheetState extends State<_CardEditSheet> {
             }),
           ),
           const SizedBox(height: 12),
-          if (_type == HemmaCardType.custom) ...[
+          if (_type == KotiCardType.custom) ...[
             EntityPickerField(
               label: 'Device (optional — overrides the design\'s entity)',
               value: _entityId,

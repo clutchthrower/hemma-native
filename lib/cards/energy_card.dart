@@ -23,7 +23,7 @@ class EnergyCard extends StatelessWidget {
       builder: (context, states) {
         final entity = states[powerSensorEntityId];
         final watts = double.tryParse(entity?.state ?? '') ?? 0;
-        return HemmaEntityCard(
+        return KotiEntityCard(
           iconName: 'energy',
           label: entity?.attr<String>('friendly_name', 'Energy') ?? 'Energy',
           stateText: '${watts.toStringAsFixed(0)}W',

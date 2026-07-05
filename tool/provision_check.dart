@@ -4,7 +4,7 @@
 // ignore_for_file: avoid_print
 import 'dart:io';
 
-import 'package:hemma_native/api/ha_registry.dart';
+import 'package:koti/api/ha_registry.dart';
 
 Future<void> main() async {
   final env = <String, String>{};

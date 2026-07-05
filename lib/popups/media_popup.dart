@@ -3,14 +3,14 @@ import 'package:provider/provider.dart';
 
 import '../store/settings_store.dart';
 import '../store/state_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../widgets/entity_watcher.dart';
 import 'popup_base.dart';
 
 /// Media player controls in an anchored popup: artwork, track info,
 /// previous/play-pause/next, a volume slider, and power.
 void showMediaPopup(BuildContext context, {required String entityId, String? title}) {
-  showHemmaPopup(
+  showKotiPopup(
     context,
     title: title ?? 'Media',
     builder: (context) => _MediaControls(entityId: entityId),
@@ -30,7 +30,7 @@ class _MediaControlsState extends State<_MediaControls> {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     final store = Provider.of<StateStore>(context, listen: false);
     final settings = Provider.of<SettingsStore>(context, listen: false);
 

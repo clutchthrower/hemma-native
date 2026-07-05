@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../store/state_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../widgets/entity_watcher.dart';
-import '../widgets/hemma_icon.dart';
+import '../widgets/koti_icon.dart';
 import '../popups/popup_base.dart';
 
 /// Two-column light-group popup: the group itself plus one row per member,
 /// per `hemma_light.yaml`'s hold-action popup.
 void showLightGroupPopup(BuildContext context, String groupId, List<String> members) {
-  showHemmaPopup(
+  showKotiPopup(
     context,
     title: 'Lights',
     builder: (context) => EntityWatcher(
       entityIds: members,
       builder: (context, states) {
-        final tokens = HemmaTheme.of(context);
+        final tokens = KotiTheme.of(context);
         final store = Provider.of<StateStore>(context, listen: false);
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -25,7 +25,7 @@ void showLightGroupPopup(BuildContext context, String groupId, List<String> memb
             final isOn = entity?.state == 'on';
             final name = entity?.attr<String>('friendly_name', id) ?? id;
             return ListTile(
-              leading: HemmaIconCircle(
+              leading: KotiIconCircle(
                 iconName: 'light',
                 iconColor: isOn ? tokens.activeColor : tokens.textSecondary,
                 backgroundColor:

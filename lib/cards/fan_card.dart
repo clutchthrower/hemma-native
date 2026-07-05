@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../popups/popup_base.dart';
 import '../store/state_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../widgets/entity_watcher.dart';
 import 'base_entity_card.dart';
 
@@ -27,7 +27,7 @@ class FanCard extends StatelessWidget {
         final pct = entity?.attrDouble('percentage');
         final name =
             label ?? entity?.attr<String>('friendly_name', entityId) ?? entityId;
-        return HemmaEntityCard(
+        return KotiEntityCard(
           iconName: 'fan',
           label: name,
           stateText: active
@@ -35,7 +35,7 @@ class FanCard extends StatelessWidget {
               : 'Off',
           active: active,
           position: position,
-          onTap: () => showHemmaPopup(
+          onTap: () => showKotiPopup(
             context,
             title: name,
             builder: (context) => _FanControls(entityId: entityId),
@@ -72,7 +72,7 @@ class _FanControlsState extends State<_FanControls> {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     final store = Provider.of<StateStore>(context, listen: false);
 
     return EntityWatcher(

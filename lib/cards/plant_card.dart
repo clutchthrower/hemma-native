@@ -37,7 +37,7 @@ class PlantCard extends StatelessWidget {
                         ? 'Poor'
                         : 'Critical';
 
-        return HemmaEntityCard(
+        return KotiEntityCard(
           iconName: 'plant',
           label: entity?.attr<String>('friendly_name', plantEntityId) ?? plantEntityId,
           stateText: label,

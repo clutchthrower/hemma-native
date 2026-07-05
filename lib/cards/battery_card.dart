@@ -42,7 +42,7 @@ class _BatteryCardState extends State<BatteryCard> {
       return level <= widget.lowThreshold;
     });
 
-    return HemmaEntityCard(
+    return KotiEntityCard(
       iconName: 'battery',
       label: 'Batteries',
       stateText: needsAttention ? 'Needs Attention' : 'All Good',

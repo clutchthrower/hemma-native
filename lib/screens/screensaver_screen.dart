@@ -6,7 +6,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 import '../store/settings_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../widgets/clock_widget.dart';
 import '../widgets/weather_widget.dart';
 

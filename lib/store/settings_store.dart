@@ -13,21 +13,21 @@ enum ConnectionMode { localOnly, remoteOnly, auto }
 /// never written to SharedPreferences or logged.
 class SettingsStore extends ChangeNotifier {
   static const _secureStorage = FlutterSecureStorage();
-  static const _tokenKey = 'hemma_ha_access_token';
+  static const _tokenKey = 'koti_ha_access_token';
 
-  static const _kLocalUrl = 'hemma_local_url';
-  static const _kRemoteUrl = 'hemma_remote_url';
-  static const _kConnectionMode = 'hemma_connection_mode';
-  static const _kReconnectSeconds = 'hemma_reconnect_seconds';
-  static const _kTimeoutSeconds = 'hemma_timeout_seconds';
-  static const _kRooms = 'hemma_rooms_v1';
-  static const _kHomeRoom = 'hemma_home_room_v1';
-  static const _kOnboarded = 'hemma_onboarded';
-  static const _kWeatherEntity = 'hemma_weather_entity';
-  static const _kDeviceId = 'hemma_device_id';
-  static const _kWebhookId = 'hemma_ha_webhook_id';
-  static const _kUpdateChecks = 'hemma_update_checks';
-  static const _kBleProxy = 'hemma_ble_proxy';
+  static const _kLocalUrl = 'koti_local_url';
+  static const _kRemoteUrl = 'koti_remote_url';
+  static const _kConnectionMode = 'koti_connection_mode';
+  static const _kReconnectSeconds = 'koti_reconnect_seconds';
+  static const _kTimeoutSeconds = 'koti_timeout_seconds';
+  static const _kRooms = 'koti_rooms_v1';
+  static const _kHomeRoom = 'koti_home_room_v1';
+  static const _kOnboarded = 'koti_onboarded';
+  static const _kWeatherEntity = 'koti_weather_entity';
+  static const _kDeviceId = 'koti_device_id';
+  static const _kWebhookId = 'koti_ha_webhook_id';
+  static const _kUpdateChecks = 'koti_update_checks';
+  static const _kBleProxy = 'koti_ble_proxy';
 
   String localUrl = '';
   String remoteUrl = '';

@@ -4,7 +4,7 @@
 // ignore_for_file: avoid_print
 import 'dart:io';
 
-import 'package:hemma_native/api/ha_discovery.dart';
+import 'package:koti/api/ha_discovery.dart';
 
 Future<void> main() async {
   print('Scanning for Home Assistant via mDNS…');

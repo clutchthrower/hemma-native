@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../store/helper_store.dart';
 import '../store/state_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../widgets/entity_watcher.dart';
 import 'popup_base.dart';
 
@@ -26,13 +26,13 @@ void showNetworkPopup(
     if (pingSensorEntityId != null) pingSensorEntityId,
   ];
 
-  showHemmaPopup(
+  showKotiPopup(
     context,
     title: 'Network',
     builder: (context) => EntityWatcher(
       entityIds: ids,
       builder: (context, states) {
-        final tokens = HemmaTheme.of(context);
+        final tokens = KotiTheme.of(context);
         final down = double.tryParse(states[downloadSensorEntityId]?.state ?? '') ?? 0;
         final up = uploadSensorEntityId != null
             ? double.tryParse(states[uploadSensorEntityId]?.state ?? '') ?? 0

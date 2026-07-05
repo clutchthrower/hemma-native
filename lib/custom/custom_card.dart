@@ -5,10 +5,10 @@ import '../cards/base_entity_card.dart';
 import '../models/entity_state.dart';
 import '../popups/popup_base.dart';
 import '../store/state_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/entity_watcher.dart';
-import '../widgets/hemma_icon.dart';
+import '../widgets/koti_icon.dart';
 import 'card_spec.dart';
 import 'template_engine.dart';
 
@@ -68,7 +68,7 @@ class CustomCard extends StatelessWidget {
         }
 
         final progress = resolveNumber(spec.progressValue, scope);
-        return HemmaEntityCard(
+        return KotiEntityCard(
           iconName: CustomCardSpec.knownIcons.contains(spec.icon)
               ? spec.icon
               : CustomCardSpec.fallbackIcon,
@@ -138,7 +138,7 @@ Future<void> showCustomCardPopup(
       : [
           {'type': 'entity'}
         ];
-  return showHemmaPopup(
+  return showKotiPopup(
     context,
     title: title,
     builder: (context) => CustomBlocks(
@@ -150,7 +150,7 @@ Future<void> showCustomCardPopup(
   );
 }
 
-/// A free-form card face: same shell as [HemmaEntityCard] (specular
+/// A free-form card face: same shell as [KotiEntityCard] (specular
 /// border, active overlay, radius) with user blocks inside. Content that
 /// doesn't fit the tile clips cleanly instead of erroring.
 class _FreeFormFace extends StatelessWidget {
@@ -170,7 +170,7 @@ class _FreeFormFace extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -215,7 +215,7 @@ class _QuickActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     final quick = spec.quick!;
     final iconName = quick['icon'] as String? ?? 'power_on';
     final onTap = buildAction(
@@ -227,7 +227,7 @@ class _QuickActionButton extends StatelessWidget {
     );
     return IconButton(
       onPressed: onTap,
-      icon: HemmaIcon(
+      icon: KotiIcon(
         CustomCardSpec.knownIcons.contains(iconName)
             ? iconName
             : CustomCardSpec.fallbackIcon,
@@ -285,7 +285,7 @@ class CustomBlocks extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     switch (block['type']) {
       case 'text':
         return _textBlock(block, scope, tokens);
@@ -357,7 +357,7 @@ class CustomBlocks extends StatelessWidget {
   }
 
   Widget _textBlock(
-      Map<String, dynamic> block, TemplateScope scope, HemmaTokens tokens) {
+      Map<String, dynamic> block, TemplateScope scope, KotiTokens tokens) {
     final (size, weight) = switch (block['size'] as String?) {
       'small' => (12.0, FontWeight.w500),
       'large' => (18.0, FontWeight.w600),
@@ -395,7 +395,7 @@ class CustomBlocks extends StatelessWidget {
   }
 
   Widget _iconBlock(
-      Map<String, dynamic> block, TemplateScope scope, HemmaTokens tokens) {
+      Map<String, dynamic> block, TemplateScope scope, KotiTokens tokens) {
     var iconName = block['icon'] as String? ?? CustomCardSpec.fallbackIcon;
     if (!CustomCardSpec.knownIcons.contains(iconName)) {
       iconName = CustomCardSpec.fallbackIcon;
@@ -403,11 +403,11 @@ class CustomBlocks extends StatelessWidget {
     final active = evalCondition(block['activeWhen'] as String?, scope);
     final size = (block['size'] as num?)?.toDouble() ?? 44;
     if (block['circle'] == false) {
-      return HemmaIcon(iconName,
+      return KotiIcon(iconName,
           size: size * 0.59,
           color: active ? tokens.activeColor : tokens.textPrimary);
     }
-    return HemmaIconCircle(
+    return KotiIconCircle(
       iconName: iconName,
       iconColor: active ? tokens.activeColor : tokens.textPrimary,
       backgroundColor: tokens.iconCircleBackground,
@@ -417,7 +417,7 @@ class CustomBlocks extends StatelessWidget {
 
   Widget _buttonBlock(
       BuildContext context, Map<String, dynamic> block, TemplateScope scope) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     final onTap = buildAction(
       context,
       (block['action'] as Map?)?.cast<String, dynamic>(),
@@ -429,7 +429,7 @@ class CustomBlocks extends StatelessWidget {
     final iconName = block['icon'] as String?;
     final icon = iconName == null
         ? null
-        : HemmaIcon(
+        : KotiIcon(
             CustomCardSpec.knownIcons.contains(iconName)
                 ? iconName
                 : CustomCardSpec.fallbackIcon,
@@ -453,7 +453,7 @@ class CustomBlocks extends StatelessWidget {
   }
 
   Widget _entityBlock(BuildContext context, Map<String, dynamic> block,
-      TemplateScope scope, HemmaTokens tokens) {
+      TemplateScope scope, KotiTokens tokens) {
     final entityId = block['entity'] as String? ?? defaultEntity;
     final entity = entityId == null ? null : scope.lookup(entityId);
     var iconName = block['icon'] as String? ??
@@ -465,7 +465,7 @@ class CustomBlocks extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          HemmaIconCircle(
+          KotiIconCircle(
             iconName: iconName,
             iconColor: tokens.textPrimary,
             backgroundColor: tokens.iconCircleBackground,
@@ -514,7 +514,7 @@ class _ToggleBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     final store = Provider.of<StateStore>(context, listen: false);
     final entityId = block['entity'] as String? ?? defaultEntity;
     final EntityState? entity = entityId == null ? null : scope.lookup(entityId);
@@ -553,7 +553,7 @@ class _SliderBlockState extends State<_SliderBlock> {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     final store = Provider.of<StateStore>(context, listen: false);
     final block = widget.block;
 

@@ -9,7 +9,7 @@ import 'popup_base.dart';
 /// falling back to fast snapshot polling for stills-only cameras.
 void showCameraPopup(BuildContext context, {required String entityId, String? title}) {
   final settings = Provider.of<SettingsStore>(context, listen: false);
-  showHemmaPopup(
+  showKotiPopup(
     context,
     title: title ?? 'Camera',
     builder: (context) => MjpegView(

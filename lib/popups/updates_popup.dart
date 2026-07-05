@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../store/state_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import 'popup_base.dart';
 
 void showUpdatesPopup(BuildContext context) {
   final store = Provider.of<StateStore>(context, listen: false);
-  showHemmaPopup(
+  showKotiPopup(
     context,
     title: 'Updates',
     builder: (context) {
-      final tokens = HemmaTheme.of(context);
+      final tokens = KotiTheme.of(context);
       final updates =
           store.all.values.where((e) => e.domain == 'update' && e.state == 'on').toList();
       if (updates.isEmpty) {

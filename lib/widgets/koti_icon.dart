@@ -5,12 +5,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 /// `-webkit-mask-image` technique used to dynamically color SVGs in the web
 /// dashboard. Icons never load over the network — all 74 assets ship in
 /// `assets/icons/`.
-class HemmaIcon extends StatelessWidget {
+class KotiIcon extends StatelessWidget {
   final String name;
   final double size;
   final Color color;
 
-  const HemmaIcon(
+  const KotiIcon(
     this.name, {
     super.key,
     this.size = 26,
@@ -30,14 +30,14 @@ class HemmaIcon extends StatelessWidget {
 
 /// Circular icon container matching `#img-cell` from `hemma_entity.yaml`:
 /// 44px on desktop/tablet, 38px on mobile portrait.
-class HemmaIconCircle extends StatelessWidget {
+class KotiIconCircle extends StatelessWidget {
   final String iconName;
   final Color iconColor;
   final Color backgroundColor;
   final double diameter;
   final double? iconSize;
 
-  const HemmaIconCircle({
+  const KotiIconCircle({
     super.key,
     required this.iconName,
     required this.iconColor,
@@ -56,7 +56,7 @@ class HemmaIconCircle extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
-      child: HemmaIcon(
+      child: KotiIcon(
         iconName,
         size: iconSize ?? diameter * 0.59,
         color: iconColor,

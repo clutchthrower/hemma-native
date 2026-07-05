@@ -11,7 +11,7 @@ import '../models/entity_state.dart';
 /// `state_changed` event stream. Persists a snapshot to local storage so the
 /// UI can render instantly on cold launch before the socket reconnects.
 class StateStore extends ChangeNotifier {
-  static const _cacheKey = 'hemma_state_cache_v1';
+  static const _cacheKey = 'koti_state_cache_v1';
 
   final HaWebSocketClient ws;
   final HaRestClient rest;

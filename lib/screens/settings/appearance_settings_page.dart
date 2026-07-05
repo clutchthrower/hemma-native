@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../theme/hemma_theme.dart';
+import '../../theme/koti_theme.dart';
 import '../../theme/tokens.dart';
 
 class AppearanceSettingsPage extends StatelessWidget {
@@ -11,7 +11,7 @@ class AppearanceSettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeController>();
     const accentOptions = [
-      HemmaTokens.defaultAccent,
+      KotiTokens.defaultAccent,
       Color(0xFFE8934F),
       Color(0xFF63C58B),
       Color(0xFFE85D4F),

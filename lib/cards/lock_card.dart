@@ -29,7 +29,7 @@ class LockCard extends StatelessWidget {
           'unlocking' => ('lock-unlocking', 'Unlocking...'),
           _ => ('lock', 'Locked'),
         };
-        return HemmaEntityCard(
+        return KotiEntityCard(
           iconName: icon,
           label: label ?? entity?.attr<String>('friendly_name', entityId) ?? entityId,
           stateText: stateLabel,

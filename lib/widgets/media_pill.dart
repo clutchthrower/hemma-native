@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../models/entity_state.dart';
 import '../store/state_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import 'entity_watcher.dart';
-import 'hemma_icon.dart';
+import 'koti_icon.dart';
 
 /// The "now playing" pill under the hero badges: track title, artist, and
 /// pause/next controls for the first media player that's actively playing.
@@ -17,7 +17,7 @@ class MediaPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (mediaPlayerEntityIds.isEmpty) return const SizedBox.shrink();
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
 
     return EntityWatcher(
       entityIds: mediaPlayerEntityIds,
@@ -56,7 +56,7 @@ class MediaPill extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
-                child: const HemmaIcon('music', size: 22, color: Colors.white),
+                child: const KotiIcon('music', size: 22, color: Colors.white),
               ),
               const SizedBox(width: 10),
               Flexible(

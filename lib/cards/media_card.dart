@@ -47,7 +47,7 @@ class MediaCard extends StatelessWidget {
             ? (position0 / duration).clamp(0.0, 1.0)
             : null;
 
-        return HemmaEntityCard(
+        return KotiEntityCard(
           iconName: 'speaker',
           label: label,
           stateText: stateText,

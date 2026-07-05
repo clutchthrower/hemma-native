@@ -38,7 +38,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
     });
     try {
       final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/hemma-update.apk');
+      final file = File('${dir.path}/koti-update.apk');
 
       final request = http.Request('GET', Uri.parse(widget.info.apkUrl));
       final response = await http.Client().send(request);
@@ -59,7 +59,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
 
       // Hand the APK to Android's installer (FileProvider on the native
       // side). The system takes over from here.
-      await const MethodChannel('hemma/native')
+      await const MethodChannel('koti/native')
           .invokeMethod('installApk', {'path': file.path});
       if (mounted) setState(() => _progress = null);
     } catch (e) {

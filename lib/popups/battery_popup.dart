@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../store/state_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import 'popup_base.dart';
 
 void showBatteryPopup(BuildContext context, List<String>? entityFilter, int lowThreshold) {
   final store = Provider.of<StateStore>(context, listen: false);
-  showHemmaPopup(
+  showKotiPopup(
     context,
     title: 'Batteries',
     builder: (context) {
-      final tokens = HemmaTheme.of(context);
+      final tokens = KotiTheme.of(context);
       final batteries = store.all.values
           .where((e) =>
               e.attr<String>('device_class', '') == 'battery' &&

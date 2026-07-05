@@ -18,7 +18,7 @@ class HumidifierCard extends StatelessWidget {
       builder: (context, states) {
         final entity = states[entityId];
         final active = entity?.state == 'on';
-        return HemmaEntityCard(
+        return KotiEntityCard(
           iconName: active ? 'humidifier-on' : 'humidifier',
           label: entity?.attr<String>('friendly_name', entityId) ?? entityId,
           stateText: active ? 'On' : 'Off',

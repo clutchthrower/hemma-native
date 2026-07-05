@@ -24,7 +24,7 @@ class DoorbellCard extends StatelessWidget {
         // A doorbell backed by a camera entity opens the live view; a
         // binary_sensor doorbell is status-only.
         final isCamera = entityId.startsWith('camera.');
-        return HemmaEntityCard(
+        return KotiEntityCard(
           iconName: 'doorbell',
           label: name,
           stateText: isCamera ? 'Tap for live view' : (entity?.state ?? 'Idle'),

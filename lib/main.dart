@@ -17,7 +17,7 @@ import 'screens/update_screen.dart';
 import 'store/helper_store.dart';
 import 'store/settings_store.dart';
 import 'store/state_store.dart';
-import 'theme/hemma_theme.dart';
+import 'theme/koti_theme.dart';
 import 'screens/app_shell.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/settings/rooms_settings_page.dart';
@@ -41,18 +41,18 @@ Future<void> main() async {
   final settings = SettingsStore();
   await settings.load();
 
-  runApp(HemmaApp(settings: settings));
+  runApp(KotiApp(settings: settings));
 }
 
-class HemmaApp extends StatefulWidget {
+class KotiApp extends StatefulWidget {
   final SettingsStore settings;
-  const HemmaApp({super.key, required this.settings});
+  const KotiApp({super.key, required this.settings});
 
   @override
-  State<HemmaApp> createState() => _HemmaAppState();
+  State<KotiApp> createState() => _KotiAppState();
 }
 
-class _HemmaAppState extends State<HemmaApp> with WidgetsBindingObserver {
+class _KotiAppState extends State<KotiApp> with WidgetsBindingObserver {
   StateStore? _stateStore;
   HelperStore? _helperStore;
   final ThemeController _themeController = ThemeController();
@@ -271,7 +271,7 @@ class _HemmaAppState extends State<HemmaApp> with WidgetsBindingObserver {
             onSurface: tokens.isDark ? Colors.white : const Color(0xFF1C1C1E),
           );
 
-          return HemmaTheme(
+          return KotiTheme(
             tokens: tokens,
             child: MaterialApp(
               title: 'Koti',

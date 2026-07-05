@@ -14,12 +14,12 @@ enum ScreensaverMotion {
 }
 
 /// Owns theme preferences (variant, color mode, accent, blur/transparency
-/// sliders) and derives the active [HemmaTokens]. Persisted to
+/// sliders) and derives the active [KotiTokens]. Persisted to
 /// SharedPreferences so choices survive app restarts.
 class ThemeController extends ChangeNotifier {
   ThemeVariant variant = ThemeVariant.base;
   ColorModePref colorMode = ColorModePref.system;
-  Color accentColor = HemmaTokens.defaultAccent;
+  Color accentColor = KotiTokens.defaultAccent;
   double cardTransparency = 1.0;
   double animationSpeed = 1.0;
   bool entranceAnimationsEnabled = true;
@@ -43,20 +43,20 @@ class ThemeController extends ChangeNotifier {
   bool screensaverShowWeather = true;
   ScreensaverMotion screensaverMotion = ScreensaverMotion.hop;
 
-  static const _kVariant = 'hemma_theme_variant';
-  static const _kColorMode = 'hemma_theme_color_mode';
-  static const _kAccent = 'hemma_theme_accent';
-  static const _kTransparency = 'hemma_theme_transparency';
-  static const _kAnimSpeed = 'hemma_theme_anim_speed';
-  static const _kEntranceAnim = 'hemma_theme_entrance_anim';
-  static const _kSmartRow = 'hemma_theme_smart_row';
-  static const _kParallax = 'hemma_theme_parallax';
-  static const _kScreensaver = 'hemma_theme_screensaver_minutes';
-  static const _kFullscreen = 'hemma_theme_fullscreen';
-  static const _kKeepScreenOn = 'hemma_theme_keep_screen_on';
-  static const _kSaverClock = 'hemma_theme_saver_clock';
-  static const _kSaverWeather = 'hemma_theme_saver_weather';
-  static const _kSaverMotion = 'hemma_theme_saver_motion';
+  static const _kVariant = 'koti_theme_variant';
+  static const _kColorMode = 'koti_theme_color_mode';
+  static const _kAccent = 'koti_theme_accent';
+  static const _kTransparency = 'koti_theme_transparency';
+  static const _kAnimSpeed = 'koti_theme_anim_speed';
+  static const _kEntranceAnim = 'koti_theme_entrance_anim';
+  static const _kSmartRow = 'koti_theme_smart_row';
+  static const _kParallax = 'koti_theme_parallax';
+  static const _kScreensaver = 'koti_theme_screensaver_minutes';
+  static const _kFullscreen = 'koti_theme_fullscreen';
+  static const _kKeepScreenOn = 'koti_theme_keep_screen_on';
+  static const _kSaverClock = 'koti_theme_saver_clock';
+  static const _kSaverWeather = 'koti_theme_saver_weather';
+  static const _kSaverMotion = 'koti_theme_saver_motion';
 
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -115,7 +115,7 @@ class ThemeController extends ChangeNotifier {
 
   void _applyKeepScreenOn() {
     // No-op off Android (tests, desktop): the channel simply isn't there.
-    const MethodChannel('hemma/native')
+    const MethodChannel('koti/native')
         .invokeMethod('setKeepScreenOn', {'on': keepScreenOnEnabled})
         .catchError((_) => null);
   }
@@ -224,14 +224,14 @@ class ThemeController extends ChangeNotifier {
     _save();
   }
 
-  HemmaTokens tokensFor(BuildContext context) {
+  KotiTokens tokensFor(BuildContext context) {
     final systemBrightness = MediaQuery.platformBrightnessOf(context);
     final brightness = switch (colorMode) {
       ColorModePref.system => systemBrightness,
       ColorModePref.light => Brightness.light,
       ColorModePref.dark => Brightness.dark,
     };
-    return HemmaTokens(
+    return KotiTokens(
       brightness: brightness,
       variant: variant,
       accentColor: accentColor,
@@ -240,20 +240,20 @@ class ThemeController extends ChangeNotifier {
   }
 }
 
-/// Makes the resolved [HemmaTokens] available to the widget tree without
+/// Makes the resolved [KotiTokens] available to the widget tree without
 /// forcing a full-tree rebuild on every theme tweak — widgets that only
-/// need tokens can read via [HemmaTheme.of].
-class HemmaTheme extends InheritedWidget {
-  final HemmaTokens tokens;
+/// need tokens can read via [KotiTheme.of].
+class KotiTheme extends InheritedWidget {
+  final KotiTokens tokens;
 
-  const HemmaTheme({super.key, required this.tokens, required super.child});
+  const KotiTheme({super.key, required this.tokens, required super.child});
 
-  static HemmaTokens of(BuildContext context) {
-    final widget = context.dependOnInheritedWidgetOfExactType<HemmaTheme>();
-    assert(widget != null, 'No HemmaTheme found in context');
+  static KotiTokens of(BuildContext context) {
+    final widget = context.dependOnInheritedWidgetOfExactType<KotiTheme>();
+    assert(widget != null, 'No KotiTheme found in context');
     return widget!.tokens;
   }
 
   @override
-  bool updateShouldNotify(HemmaTheme oldWidget) => oldWidget.tokens != tokens;
+  bool updateShouldNotify(KotiTheme oldWidget) => oldWidget.tokens != tokens;
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 
 /// Popover-style popup that grows out of the widget that opened it (the
 /// calling [context]'s render box): sized to its content, a bit wider than
@@ -8,12 +8,12 @@ import '../theme/hemma_theme.dart';
 /// Falls back to a centered dialog when the caller has no usable anchor
 /// (e.g. opened from the nav bar). The scrim is a solid low-opacity color,
 /// never a blur.
-Future<T?> showHemmaPopup<T>(
+Future<T?> showKotiPopup<T>(
   BuildContext context, {
   required String title,
   required WidgetBuilder builder,
 }) {
-  final tokens = HemmaTheme.of(context);
+  final tokens = KotiTheme.of(context);
   final screen = MediaQuery.sizeOf(context);
 
   // Anchor = the widget this popup was opened from.

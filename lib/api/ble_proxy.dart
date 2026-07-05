@@ -8,8 +8,8 @@ import 'esphome_server.dart';
 /// (EventChannel), the ESPHome API server, and the mDNS advertisement that
 /// makes Home Assistant discover the tablet on Devices & services.
 class BleProxy {
-  static const _channel = MethodChannel('hemma/native');
-  static const _scanChannel = EventChannel('hemma/ble');
+  static const _channel = MethodChannel('koti/native');
+  static const _scanChannel = EventChannel('koti/ble');
 
   EsphomeServer? _server;
   StreamSubscription? _scanSub;

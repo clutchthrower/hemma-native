@@ -25,7 +25,7 @@ class HaDeviceRegistration {
           },
           body: jsonEncode({
             'device_id': deviceId,
-            'app_id': 'com.hemma.hemma_native',
+            'app_id': 'com.koti.dashboard',
             'app_name': 'Koti',
             'app_version': '1.0.0',
             'device_name': 'Koti Tablet',

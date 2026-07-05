@@ -9,13 +9,13 @@ enum ColorModePref { system, light, dark }
 /// Per CLAUDE.md, no BackdropFilter/real-time blur is used — the original's
 /// `backdrop-filter: blur()` surfaces are reproduced as solid low-opacity
 /// colors at the same alpha the original used underneath its blur.
-class HemmaTokens {
+class KotiTokens {
   final Brightness brightness;
   final ThemeVariant variant;
   final Color accentColor;
   final double cardTransparency; // 0..1, alpha multiplier for surfaces
 
-  const HemmaTokens({
+  const KotiTokens({
     required this.brightness,
     required this.variant,
     required this.accentColor,
@@ -96,13 +96,13 @@ class HemmaTokens {
     );
   }
 
-  HemmaTokens copyWith({
+  KotiTokens copyWith({
     Brightness? brightness,
     ThemeVariant? variant,
     Color? accentColor,
     double? cardTransparency,
   }) {
-    return HemmaTokens(
+    return KotiTokens(
       brightness: brightness ?? this.brightness,
       variant: variant ?? this.variant,
       accentColor: accentColor ?? this.accentColor,

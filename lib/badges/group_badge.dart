@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../utils/device_mode.dart';
-import '../widgets/hemma_icon.dart';
+import '../widgets/koti_icon.dart';
 
 /// Shared visual shell for the four hero-card group badges
 /// (`hemma_badge_climate_group`, `_media_group`, `_light_group`,
@@ -28,7 +28,7 @@ class GroupBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     final mode = deviceModeFor(context);
     final color = accent ?? tokens.activeColor;
 
@@ -54,7 +54,7 @@ class GroupBadge extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            HemmaIcon(iconName, size: iconSize, color: color),
+            KotiIcon(iconName, size: iconSize, color: color),
             const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

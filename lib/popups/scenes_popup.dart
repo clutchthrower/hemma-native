@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../store/state_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import 'popup_base.dart';
 
 /// Replicates the desktop navbar's Scenes dropdown / mobile Scenes sheet:
 /// lists `scene.*` entities, hiding any whose entity_id carries the
 /// `hemma_`-style internal prefix used for snapshot/restore scenes.
-void showScenesPopup(BuildContext context, {String filterPrefix = 'hemma_'}) {
+void showScenesPopup(BuildContext context, {String filterPrefix = 'koti_'}) {
   final store = Provider.of<StateStore>(context, listen: false);
-  showHemmaPopup(
+  showKotiPopup(
     context,
     title: 'Scenes',
     builder: (context) {
-      final tokens = HemmaTheme.of(context);
+      final tokens = KotiTheme.of(context);
       final scenes = store.all.values.where((e) =>
           e.domain == 'scene' && !e.entityId.split('.').last.startsWith(filterPrefix));
       if (scenes.isEmpty) {

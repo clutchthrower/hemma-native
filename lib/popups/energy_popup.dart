@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../widgets/entity_watcher.dart';
 import 'popup_base.dart';
 
@@ -12,13 +12,13 @@ Color _wattageColor(double watts) {
 }
 
 void showEnergyPopup(BuildContext context, String powerEntityId) {
-  showHemmaPopup(
+  showKotiPopup(
     context,
     title: 'Energy',
     builder: (context) => EntityWatcher(
       entityIds: [powerEntityId],
       builder: (context, states) {
-        final tokens = HemmaTheme.of(context);
+        final tokens = KotiTheme.of(context);
         final watts = double.tryParse(states[powerEntityId]?.state ?? '') ?? 0;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

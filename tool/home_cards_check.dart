@@ -8,7 +8,7 @@ import 'dart:io';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import 'package:hemma_native/models/entity_state.dart';
+import 'package:koti/models/entity_state.dart';
 
 Future<void> main() async {
   final env = <String, String>{};

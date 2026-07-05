@@ -6,7 +6,7 @@ import '../edit/card_edit_sheet.dart';
 import '../edit/edit_mode.dart';
 import '../models/room_config.dart';
 import '../store/state_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../theme/tokens.dart';
 import '../utils/device_mode.dart';
 import 'smart_row.dart';
@@ -96,7 +96,7 @@ class EntityGrid extends StatelessWidget {
   }
 
   Widget _addTile(BuildContext context, Size tile) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     return GestureDetector(
       onTap: () => _addCard(context),
       child: Container(
@@ -117,14 +117,14 @@ class EntityGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final mode = deviceModeFor(context);
     final portrait = isPortrait(context);
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     final themeController = context.watch<ThemeController>();
     final edit = context.watch<EditModeController>();
     final size = MediaQuery.sizeOf(context);
     final editing = edit.editing && onCardsChanged != null;
 
     if (portrait) {
-      final tile = HemmaTokens.tileSizeMobilePortrait;
+      final tile = KotiTokens.tileSizeMobilePortrait;
       final gutter = mode == DeviceMode.mobile ? tokens.pageGutterMobile : size.width * 0.04;
       final itemCount = cards.length + (editing ? 1 : 0);
       return Padding(
@@ -133,27 +133,43 @@ class EntityGrid extends StatelessWidget {
           left: gutter,
           right: gutter,
         ),
-        child: GridView.builder(
-          padding: const EdgeInsets.only(bottom: 40),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: tile.width / tile.height,
+        // Cards scrolling up used to vanish at a hard line below the room
+        // title; this alpha-gradient mask fades them out over the top
+        // ~48px instead. A single static gradient shader — cheap on old
+        // GPUs, unlike blur.
+        child: ShaderMask(
+          shaderCallback: (rect) => LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: const [
+              Colors.transparent,
+              Colors.white,
+            ],
+            stops: [0.0, (48.0 / rect.height).clamp(0.0, 1.0)],
+          ).createShader(rect),
+          blendMode: BlendMode.dstIn,
+          child: GridView.builder(
+            padding: const EdgeInsets.only(top: 8, bottom: 40),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              childAspectRatio: tile.width / tile.height,
+            ),
+            itemCount: itemCount,
+            itemBuilder: (context, i) => i == cards.length
+                ? _addTile(context, tile)
+                : _wrapTile(context, edit, cards[i], buildEntityCard(cards[i], i)),
           ),
-          itemCount: itemCount,
-          itemBuilder: (context, i) => i == cards.length
-              ? _addTile(context, tile)
-              : _wrapTile(context, edit, cards[i], buildEntityCard(cards[i], i)),
         ),
       );
     }
 
     final tile = mode == DeviceMode.mobile
-        ? HemmaTokens.tileSizeMobileLandscape
+        ? KotiTokens.tileSizeMobileLandscape
         : mode == DeviceMode.tablet
-            ? HemmaTokens.tileSizeTablet
-            : HemmaTokens.tileSizeDesktop;
+            ? KotiTokens.tileSizeTablet
+            : KotiTokens.tileSizeDesktop;
     final gutter = mode == DeviceMode.desktop ? size.width * 0.08 : size.width * 0.04;
 
     // Single row hugging the bottom edge, starting at the page gutter —

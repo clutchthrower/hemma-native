@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
-import 'package:hemma_native/api/app_update.dart';
+import 'package:koti/api/app_update.dart';
 
 MockClient _github(Map<String, dynamic> release) => MockClient((request) async {
       expect(request.url.path, '/repos/owner/repo/releases/latest');
@@ -17,7 +17,7 @@ Map<String, dynamic> _release(String tag, {bool withApk = true}) => {
       'assets': [
         if (withApk)
           {
-            'name': 'hemma-$tag.apk',
+            'name': 'koti-$tag.apk',
             'browser_download_url': 'https://example.com/$tag.apk',
           },
         {

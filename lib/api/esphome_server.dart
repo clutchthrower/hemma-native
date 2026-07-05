@@ -33,7 +33,7 @@ class EsphomeServer {
   static const port = 6053;
   static const _featureFlags = 1 | 32; // passive scan + raw advertisements
 
-  final String name; // hostname-style, e.g. "hemma-tablet"
+  final String name; // hostname-style, e.g. "koti-tablet"
   final String friendlyName;
   final String macAddress; // "AA:BB:CC:DD:EE:FF"
   final String bluetoothMacAddress;

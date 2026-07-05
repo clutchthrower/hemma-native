@@ -1,10 +1,10 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../utils/color_utils.dart';
 import '../utils/device_mode.dart';
-import '../widgets/hemma_icon.dart';
+import '../widgets/koti_icon.dart';
 
 /// Base tile every entity card in the grid is built from
 /// (`hemma_entity.yaml` / `hemma_default.yaml` in the original dashboard).
@@ -17,7 +17,7 @@ import '../widgets/hemma_icon.dart';
 /// - an active-state overlay driven by [active]
 /// - a staggered fade/slide entrance keyed off [position]
 /// - an optional circular progress ring and battery pill
-class HemmaEntityCard extends StatefulWidget {
+class KotiEntityCard extends StatefulWidget {
   final String iconName;
   final String label;
   final String stateText;
@@ -27,9 +27,9 @@ class HemmaEntityCard extends StatefulWidget {
   final VoidCallback? onLongPress;
   final double? progress; // 0..1, shown as a ring behind the icon
   final int? batteryPercent;
-  final Widget? trailing; // used by HemmaEntityActions variant
+  final Widget? trailing; // used by KotiEntityActions variant
 
-  const HemmaEntityCard({
+  const KotiEntityCard({
     super.key,
     required this.iconName,
     required this.label,
@@ -44,10 +44,10 @@ class HemmaEntityCard extends StatefulWidget {
   });
 
   @override
-  State<HemmaEntityCard> createState() => _HemmaEntityCardState();
+  State<KotiEntityCard> createState() => _KotiEntityCardState();
 }
 
-class _HemmaEntityCardState extends State<HemmaEntityCard>
+class _KotiEntityCardState extends State<KotiEntityCard>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _fade;
@@ -82,7 +82,7 @@ class _HemmaEntityCardState extends State<HemmaEntityCard>
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     final mode = deviceModeFor(context);
     final portrait = mode == DeviceMode.mobile && isPortrait(context);
 
@@ -155,7 +155,7 @@ class _HemmaEntityCardState extends State<HemmaEntityCard>
                                 ),
                               ),
                             ),
-                          HemmaIconCircle(
+                          KotiIconCircle(
                             iconName: widget.iconName,
                             iconColor: widget.active ? tokens.activeColor : tokens.textPrimary,
                             backgroundColor: tokens.iconCircleBackground,

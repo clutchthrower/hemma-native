@@ -5,15 +5,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:hemma_native/api/ha_rest_client.dart';
-import 'package:hemma_native/api/ha_websocket_client.dart';
-import 'package:hemma_native/custom/card_spec.dart';
-import 'package:hemma_native/custom/custom_card.dart';
-import 'package:hemma_native/custom/template_engine.dart';
-import 'package:hemma_native/models/entity_state.dart';
-import 'package:hemma_native/store/state_store.dart';
-import 'package:hemma_native/theme/hemma_theme.dart';
-import 'package:hemma_native/theme/tokens.dart';
+import 'package:koti/api/ha_rest_client.dart';
+import 'package:koti/api/ha_websocket_client.dart';
+import 'package:koti/custom/card_spec.dart';
+import 'package:koti/custom/custom_card.dart';
+import 'package:koti/custom/template_engine.dart';
+import 'package:koti/models/entity_state.dart';
+import 'package:koti/store/state_store.dart';
+import 'package:koti/theme/koti_theme.dart';
+import 'package:koti/theme/tokens.dart';
 
 EntityState _e(String id, String state, [Map<String, dynamic>? attrs]) =>
     EntityState(
@@ -140,11 +140,11 @@ void main() {
 
       return ChangeNotifierProvider<StateStore>.value(
         value: store,
-        child: HemmaTheme(
-          tokens: HemmaTokens(
+        child: KotiTheme(
+          tokens: KotiTokens(
             brightness: Brightness.dark,
             variant: ThemeVariant.base,
-            accentColor: HemmaTokens.defaultAccent,
+            accentColor: KotiTokens.defaultAccent,
             cardTransparency: 1.0,
           ),
           child: MaterialApp(

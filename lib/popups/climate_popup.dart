@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../utils/color_utils.dart';
 import '../widgets/entity_watcher.dart';
 import 'popup_base.dart';
@@ -22,7 +22,7 @@ void showClimatePopup(
     if (aqiSensorEntityId != null) aqiSensorEntityId,
   ];
 
-  showHemmaPopup(
+  showKotiPopup(
     context,
     title: roomName,
     builder: (context) => EntityWatcher(
@@ -78,7 +78,7 @@ class _Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     return Column(
       children: [
         Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: color)),

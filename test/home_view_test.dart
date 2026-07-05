@@ -3,17 +3,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:hemma_native/api/ha_rest_client.dart';
-import 'package:hemma_native/api/ha_websocket_client.dart';
-import 'package:hemma_native/edit/edit_mode.dart';
-import 'package:hemma_native/models/entity_state.dart';
-import 'package:hemma_native/models/room_config.dart';
-import 'package:hemma_native/screens/home_overview_screen.dart';
-import 'package:hemma_native/store/helper_store.dart';
-import 'package:hemma_native/store/settings_store.dart';
-import 'package:hemma_native/store/state_store.dart';
-import 'package:hemma_native/theme/hemma_theme.dart';
-import 'package:hemma_native/theme/tokens.dart';
+import 'package:koti/api/ha_rest_client.dart';
+import 'package:koti/api/ha_websocket_client.dart';
+import 'package:koti/edit/edit_mode.dart';
+import 'package:koti/models/entity_state.dart';
+import 'package:koti/models/room_config.dart';
+import 'package:koti/screens/home_overview_screen.dart';
+import 'package:koti/store/helper_store.dart';
+import 'package:koti/store/settings_store.dart';
+import 'package:koti/store/state_store.dart';
+import 'package:koti/theme/koti_theme.dart';
+import 'package:koti/theme/tokens.dart';
 
 EntityState _e(String id, String state, [Map<String, dynamic>? attrs]) =>
     EntityState(
@@ -48,11 +48,11 @@ void main() {
           ChangeNotifierProvider<EditModeController>(
               create: (_) => EditModeController()),
         ],
-        child: HemmaTheme(
-          tokens: HemmaTokens(
+        child: KotiTheme(
+          tokens: KotiTokens(
             brightness: Brightness.dark,
             variant: ThemeVariant.base,
-            accentColor: HemmaTokens.defaultAccent,
+            accentColor: KotiTokens.defaultAccent,
             cardTransparency: 1.0,
           ),
           child: const MaterialApp(home: HomeView()),

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../popups/popup_base.dart';
 import '../store/state_store.dart';
-import '../theme/hemma_theme.dart';
+import '../theme/koti_theme.dart';
 import '../widgets/entity_watcher.dart';
 import 'base_entity_card.dart';
 
@@ -33,7 +33,7 @@ class VacuumCard extends StatelessWidget {
             : null;
         final name =
             label ?? entity?.attr<String>('friendly_name', entityId) ?? entityId;
-        return HemmaEntityCard(
+        return KotiEntityCard(
           iconName: icon,
           label: name,
           stateText: state[0].toUpperCase() + state.substring(1),
@@ -47,7 +47,7 @@ class VacuumCard extends StatelessWidget {
   }
 
   void _showControls(BuildContext context, String name) {
-    showHemmaPopup(
+    showKotiPopup(
       context,
       title: name,
       builder: (context) => _VacuumControls(entityId: entityId),
@@ -61,7 +61,7 @@ class _VacuumControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = HemmaTheme.of(context);
+    final tokens = KotiTheme.of(context);
     final store = Provider.of<StateStore>(context, listen: false);
 
     void call(String service) =>

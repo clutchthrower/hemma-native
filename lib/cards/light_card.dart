@@ -67,7 +67,7 @@ class LightCard extends StatelessWidget {
               entityId: entityId, data: const {'transition': 1});
         }
 
-        return HemmaEntityCard(
+        return KotiEntityCard(
           iconName: 'light',
           label: label ?? root?.attr<String>('friendly_name', entityId) ?? entityId,
           stateText: stateText,

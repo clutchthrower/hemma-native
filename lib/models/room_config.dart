@@ -1,4 +1,4 @@
-enum HemmaCardType {
+enum KotiCardType {
   light,
   thermostat,
   fan,
@@ -21,12 +21,12 @@ enum HemmaCardType {
 
 class CardConfig {
   final String id;
-  final HemmaCardType type;
+  final KotiCardType type;
   final String entityId;
   final List<String> extraEntityIds; // e.g. multi-sensor motion, group members
   final String? labelOverride;
 
-  /// For [HemmaCardType.custom]: the user-authored card design as decoded
+  /// For [KotiCardType.custom]: the user-authored card design as decoded
   /// JSON (see docs/CARD_FORMAT.md). Kept as a raw map so configs written
   /// by newer app versions survive a round-trip through older ones.
   final Map<String, dynamic>? customSpec;
@@ -51,9 +51,9 @@ class CardConfig {
 
   factory CardConfig.fromJson(Map<String, dynamic> json) => CardConfig(
         id: json['id'] as String,
-        type: HemmaCardType.values.firstWhere(
+        type: KotiCardType.values.firstWhere(
           (t) => t.name == json['type'],
-          orElse: () => HemmaCardType.custom,
+          orElse: () => KotiCardType.custom,
         ),
         entityId: json['entityId'] as String? ?? '',
         extraEntityIds: (json['extraEntityIds'] as List?)?.cast<String>() ?? const [],

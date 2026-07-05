@@ -53,36 +53,36 @@ List<CardConfig> _deriveHomeCards(StateStore store) {
     ..sort((a, b) => a.entityId.compareTo(b.entityId));
   final cards = <CardConfig>[];
 
-  void addAll(Iterable<EntityState> entities, HemmaCardType type, int cap) {
+  void addAll(Iterable<EntityState> entities, KotiCardType type, int cap) {
     for (final e in entities.take(cap)) {
       cards.add(CardConfig(id: 'home-${e.entityId}', type: type, entityId: e.entityId));
     }
   }
 
-  addAll(all.where((e) => e.domain == 'climate'), HemmaCardType.thermostat, 2);
-  addAll(all.where((e) => e.domain == 'lock'), HemmaCardType.lock, 4);
+  addAll(all.where((e) => e.domain == 'climate'), KotiCardType.thermostat, 2);
+  addAll(all.where((e) => e.domain == 'lock'), KotiCardType.lock, 4);
   addAll(
     all.where(
         (e) => e.domain == 'binary_sensor' && e.entityId.contains('doorbell')),
-    HemmaCardType.doorbell,
+    KotiCardType.doorbell,
     1,
   );
-  addAll(all.where((e) => e.domain == 'vacuum'), HemmaCardType.vacuum, 2);
+  addAll(all.where((e) => e.domain == 'vacuum'), KotiCardType.vacuum, 2);
   addAll(
     all.where((e) => e.domain == 'camera' && e.state != 'unavailable'),
-    HemmaCardType.camera,
+    KotiCardType.camera,
     2,
   );
-  addAll(all.where((e) => e.domain == 'cover'), HemmaCardType.curtain, 2);
-  addAll(all.where((e) => e.domain == 'fan'), HemmaCardType.fan, 2);
+  addAll(all.where((e) => e.domain == 'cover'), KotiCardType.curtain, 2);
+  addAll(all.where((e) => e.domain == 'fan'), KotiCardType.fan, 2);
   if (all.any((e) => e.domain == 'update' && e.state == 'on')) {
     cards.add(const CardConfig(
-        id: 'home-updates', type: HemmaCardType.updates, entityId: ''));
+        id: 'home-updates', type: KotiCardType.updates, entityId: ''));
   }
   if (all.any((e) =>
       e.domain == 'sensor' && e.attr<String>('device_class', '') == 'battery')) {
     cards.add(const CardConfig(
-        id: 'home-battery', type: HemmaCardType.battery, entityId: ''));
+        id: 'home-battery', type: KotiCardType.battery, entityId: ''));
   }
   return cards.take(12).toList();
 }

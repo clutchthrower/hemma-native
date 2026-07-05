@@ -34,7 +34,7 @@ class _UpdatesCardState extends State<UpdatesCard> {
     final count =
         store.all.values.where((e) => e.domain == 'update' && e.state == 'on').length;
 
-    return HemmaEntityCard(
+    return KotiEntityCard(
       iconName: 'updates',
       label: 'Updates',
       stateText: count > 0 ? '$count available' : 'Up to date',
