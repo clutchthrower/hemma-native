@@ -13,6 +13,7 @@ import 'api/ha_device_registration.dart';
 import 'api/ha_registry.dart';
 import 'api/ha_rest_client.dart';
 import 'api/ha_websocket_client.dart';
+import 'screens/koti_splash_screen.dart';
 import 'screens/update_screen.dart';
 import 'store/helper_store.dart';
 import 'store/settings_store.dart';
@@ -57,6 +58,7 @@ class _KotiAppState extends State<KotiApp> with WidgetsBindingObserver {
   HelperStore? _helperStore;
   final ThemeController _themeController = ThemeController();
   bool _ready = false;
+  bool _splashDone = false;
   String? _connectedUrl;
   String? _connectedToken;
 
@@ -199,47 +201,17 @@ class _KotiAppState extends State<KotiApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    if (!_ready) {
-      // Matches the native launch screen (dark + wordmark) so startup is
-      // one continuous look instead of a black gap.
-      return const MaterialApp(
+    if (!_ready || !_splashDone) {
+      // Animated splash (house draws itself → tumbles → settles into the
+      // wordmark) doubles as the loading screen: it plays while we connect
+      // and holds its final frame if HA is slower than the animation. The
+      // native launch background is the same tan, so the hand-off from
+      // Android is seamless.
+      return MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          backgroundColor: Color(0xFF19191F),
-          body: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Koti',
-                  style: TextStyle(
-                    fontFamily: 'Hanken Grotesk',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 48,
-                    color: Color(0xFFEDEDF0),
-                  ),
-                ),
-                SizedBox(height: 24),
-                SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Color(0xFF6EBAFF),
-                  ),
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Connecting to Home Assistant…',
-                  style: TextStyle(
-                    fontFamily: 'Hanken Grotesk',
-                    fontSize: 14,
-                    color: Colors.white54,
-                  ),
-                ),
-              ],
-            ),
-          ),
+        home: KotiSplashScreen(
+          ready: _ready,
+          onFinished: () => setState(() => _splashDone = true),
         ),
       );
     }

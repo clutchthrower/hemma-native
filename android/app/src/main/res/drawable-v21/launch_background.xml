@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Shown by Android while the app process starts: dark surface matching
-     the app theme with the Hemma wordmark centered. -->
+<!-- Shown by Android while the app process starts: plain tan matching the
+     animated splash's canvas, so the drawing animation appears to start
+     on the very first frame Android shows. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#19191F" />
+            <solid android:color="#B8A18F" />
         </shape>
-    </item>
-    <item>
-        <bitmap
-            android:gravity="center"
-            android:src="@drawable/launch_text" />
     </item>
 </layer-list>
