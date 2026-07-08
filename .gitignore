@@ -51,6 +51,12 @@ app.*.map.json
 # icons/fonts/backgrounds during development) - not part of this app.
 /reference_hemma/
 
+# Desktop scaffold used only for local dev verification (screenshots
+# without a physical tablet). Android is the only shipped target (see
+# CLAUDE.md) - regenerate with `flutter create --platforms=linux .` if
+# needed again.
+/linux/
+
 # Release signing - keep the keystore and its passwords out of the repo.
 # Losing these breaks the in-app update chain: BACK THEM UP.
 /android/key.properties
