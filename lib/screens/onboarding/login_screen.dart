@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +9,9 @@ import '../../store/settings_store.dart';
 
 /// Step 2 of onboarding: turn the chosen HA URL into a stored access token,
 /// either via username/password (HA's own login flow, no WebView — see
-/// [HaAuthFlow]) or by pasting an existing Long-Lived Access Token.
+/// [HaAuthFlow]) or by pasting an existing Long-Lived Access Token. The
+/// paste-a-token tab is a developer convenience only — release builds hide
+/// it so real users only ever see the one supported sign-in path.
 class LoginScreen extends StatefulWidget {
   final String baseUrl;
 
@@ -30,10 +33,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   bool _busy = false;
   String? _error;
 
+  static const _showTokenTab = !kReleaseMode;
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: _showTokenTab ? 2 : 1, vsync: this);
   }
 
   @override
@@ -50,6 +55,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       _busy = true;
       _error = null;
     });
+    final settings = Provider.of<SettingsStore>(context, listen: false);
+    final clientName = 'Koti (${settings.deviceId.substring(0, 8)})';
     try {
       final flow = HaAuthFlow(widget.baseUrl);
       var step = await flow.startLoginFlow();
@@ -61,10 +68,19 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       if (!step.isComplete || step.result == null) {
         throw HaAuthFlowException('Sign-in did not complete — check your credentials');
       }
-      final token = await flow.completeWithLongLivedToken(
-        authorizationCode: step.result!,
-        clientName: 'Koti',
-      );
+      final shortLivedToken = await flow.exchangeAuthorizationCode(step.result!);
+      String token;
+      try {
+        token = await flow.createLongLivedToken(shortLivedToken, clientName);
+      } on HaAuthFlowException catch (e) {
+        // A token with this name already exists for this account (e.g. this
+        // device was onboarded before without a factory reset) — retry once
+        // with a disambiguated name instead of leaving the user stuck. The
+        // short-lived token is reusable; the authorization code is not.
+        if (!e.alreadyExists) rethrow;
+        token = await flow.createLongLivedToken(
+          shortLivedToken, '$clientName ${DateTime.now().millisecondsSinceEpoch}');
+      }
       await _saveAndFinish(token);
     } catch (e) {
       setState(() => _error = e is HaAuthFlowException ? e.message : '$e');
@@ -136,13 +152,14 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       appBar: AppBar(title: Text('Sign in to ${widget.baseUrl}')),
       body: Column(
         children: [
-          TabBar(
-            controller: _tabController,
-            tabs: const [
-              Tab(text: 'Username & Password'),
-              Tab(text: 'Access Token'),
-            ],
-          ),
+          if (_showTokenTab)
+            TabBar(
+              controller: _tabController,
+              tabs: const [
+                Tab(text: 'Username & Password'),
+                Tab(text: 'Access Token'),
+              ],
+            ),
           if (_error != null)
             Container(
               width: double.infinity,
@@ -153,6 +170,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           Expanded(
             child: TabBarView(
               controller: _tabController,
+              physics: _showTokenTab ? null : const NeverScrollableScrollPhysics(),
               children: [
                 _PasswordTab(
                   usernameController: _usernameController,
@@ -160,10 +178,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   busy: _busy,
                   onSubmit: _signInWithPassword,
                 ),
-                _TokenTab(
-                  tokenController: _tokenController,
-                  onSubmit: _connectWithToken,
-                ),
+                if (_showTokenTab)
+                  _TokenTab(
+                    tokenController: _tokenController,
+                    onSubmit: _connectWithToken,
+                  ),
               ],
             ),
           ),

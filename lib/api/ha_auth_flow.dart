@@ -69,6 +69,15 @@ class HaAuthFlow {
     required String authorizationCode,
     required String clientName,
   }) async {
+    final shortLivedToken = await exchangeAuthorizationCode(authorizationCode);
+    return createLongLivedToken(shortLivedToken, clientName);
+  }
+
+  /// The authorization code is single-use, so this step can't be retried —
+  /// callers that need to retry [createLongLivedToken] with a different
+  /// `client_name` (e.g. after an "already exists" collision) must reuse the
+  /// short-lived token this returns instead of re-exchanging the code.
+  Future<String> exchangeAuthorizationCode(String authorizationCode) async {
     final tokenResponse = await http.post(
       Uri.parse('$baseUrl/auth/token'),
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -82,10 +91,11 @@ class HaAuthFlow {
       throw HaAuthFlowException('Could not exchange authorization code for a token');
     }
     final tokenBody = jsonDecode(tokenResponse.body) as Map<String, dynamic>;
-    final shortLivedToken = tokenBody['access_token'] as String;
-
-    return _createLongLivedToken(shortLivedToken, clientName);
+    return tokenBody['access_token'] as String;
   }
+
+  Future<String> createLongLivedToken(String accessToken, String clientName) =>
+      _createLongLivedToken(accessToken, clientName);
 
   Future<String> _createLongLivedToken(String accessToken, String clientName) async {
     final uri = Uri.parse(baseUrl);
@@ -119,8 +129,11 @@ class HaAuthFlow {
           if (msg['success'] == true) {
             completer.complete(msg['result'] as String);
           } else {
-            completer.completeError(
-                HaAuthFlowException('Could not create a long-lived token'));
+            final error = msg['error'] as Map<String, dynamic>?;
+            final message = error?['message'] as String?;
+            completer.completeError(HaAuthFlowException(
+                message ?? 'Could not create a long-lived token',
+                alreadyExists: message?.contains('already exists') ?? false));
           }
           break;
       }
@@ -160,7 +173,8 @@ class LoginFlowStep {
 
 class HaAuthFlowException implements Exception {
   final String message;
-  HaAuthFlowException(this.message);
+  final bool alreadyExists;
+  HaAuthFlowException(this.message, {this.alreadyExists = false});
   @override
   String toString() => message;
 }
