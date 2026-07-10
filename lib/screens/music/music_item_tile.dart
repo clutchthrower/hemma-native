@@ -23,30 +23,50 @@ class MusicItemTile extends StatelessWidget {
         ? null
         : (imageUrl.startsWith('http') ? imageUrl : '${settings.activeUrl}$imageUrl');
 
-    return ListTile(
-      leading: ClipRRect(
-        borderRadius: BorderRadius.circular(6),
-        child: SizedBox(
-          width: 44,
-          height: 44,
-          child: resolvedUrl != null
-              ? Image.network(
-                  resolvedUrl,
-                  fit: BoxFit.cover,
-                  headers: {'Authorization': 'Bearer ${settings.accessToken ?? ''}'},
-                  errorBuilder: (_, __, ___) => _fallbackIcon(tokens),
-                )
-              : _fallbackIcon(tokens),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      child: ListTile(
+        // entityBackground (translucent black) is meant to sit over a photo
+        // — on Music's solid dark page it would be nearly invisible, so
+        // rows use the lighter overlay instead to read as distinct cards.
+        tileColor: tokens.iconCircleBackground,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: resolvedUrl != null
+                ? Image.network(
+                    resolvedUrl,
+                    fit: BoxFit.cover,
+                    headers: {'Authorization': 'Bearer ${settings.accessToken ?? ''}'},
+                    errorBuilder: (_, __, ___) => _fallbackIcon(tokens),
+                  )
+                : _fallbackIcon(tokens),
+          ),
         ),
+        title: Text(
+          item.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+              color: tokens.entityName, fontWeight: FontWeight.w600, fontSize: 14),
+        ),
+        subtitle: item.subtitle != null
+            ? Text(
+                item.subtitle!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: tokens.entityState, fontSize: 12),
+              )
+            : null,
+        trailing: index != null
+            ? Text('${index! + 1}', style: TextStyle(color: tokens.textSecondary))
+            : Icon(Icons.play_arrow, color: tokens.textSecondary),
+        onTap: onTap,
       ),
-      title: Text(item.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-      subtitle: item.subtitle != null
-          ? Text(item.subtitle!, maxLines: 1, overflow: TextOverflow.ellipsis)
-          : null,
-      trailing: index != null
-          ? Text('${index! + 1}', style: TextStyle(color: tokens.textSecondary))
-          : Icon(Icons.play_arrow, color: tokens.textSecondary),
-      onTap: onTap,
     );
   }
 

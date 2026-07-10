@@ -23,6 +23,9 @@ hardware as old as Android 7.0 (API 24).
 - **Bluetooth proxy**: optionally relays nearby BLE advertisements to Home Assistant using
   the ESPHome native API — HA discovers the tablet on *Devices & services* like any
   ESPHome Bluetooth proxy.
+- **Tablet as a speaker**: turn the tablet into a Music Assistant player. It advertises
+  itself on the LAN (mDNS) and the [Koti integration](custom_components/koti) auto-creates
+  a `media_player` entity for it — no IP address or password to enter.
 - **Wall-tablet niceties**: fullscreen mode, launcher (home-app) mode, screensaver with
   clock/weather and burn-in protection (including a DVD-logo bounce), device brightness
   control, and in-app updates from GitHub Releases.
@@ -37,6 +40,14 @@ Grab the APK from the [latest release](../../releases/latest) and sideload it
 (enable *Install unknown apps* for your browser/file manager). On first launch the app
 finds Home Assistant on your Wi-Fi and walks you through sign-in. Once installed, the app
 updates itself from new releases here.
+
+### Home Assistant integration (for the speaker feature)
+
+Only needed if you enable *Settings → Speaker* in the app. Not on HACS yet — install
+manually: copy `custom_components/koti` from this repo into your HA config's
+`custom_components/` folder, restart Home Assistant, then enable the speaker in the app.
+HA notifies you when it discovers the tablet; approve it and a `media_player` entity
+appears automatically, ready to add to Music Assistant.
 
 ## Development
 

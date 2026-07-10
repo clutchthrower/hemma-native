@@ -15,6 +15,32 @@ import 'speaker_settings_page.dart';
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
+  Future<void> _renameDevice(BuildContext context, SettingsStore settings) async {
+    final controller = TextEditingController(text: settings.deviceName);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Device Name'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: 'e.g. Living Room Tablet',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          FilledButton(
+              onPressed: () => Navigator.pop(context, controller.text.trim()),
+              child: const Text('Save')),
+        ],
+      ),
+    );
+    if (name != null && name.isNotEmpty) await settings.setDeviceName(name);
+  }
+
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsStore>();
@@ -23,6 +49,15 @@ class SettingsScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         children: [
+          ListTile(
+            leading: const Icon(Icons.badge_outlined),
+            title: const Text('Device Name'),
+            subtitle: Text(
+                '${settings.deviceName} — identifies this tablet to Home Assistant '
+                '(Bluetooth proxy, speaker). Change it if you have more than one.'),
+            trailing: const Icon(Icons.edit_outlined),
+            onTap: () => _renameDevice(context, settings),
+          ),
           ListTile(
             leading: const Icon(Icons.link_outlined),
             title: const Text('Connection'),
@@ -90,9 +125,9 @@ class SettingsScreen extends StatelessWidget {
           SwitchListTile(
             secondary: const Icon(Icons.bluetooth_searching),
             title: const Text('Bluetooth Proxy'),
-            subtitle: const Text(
+            subtitle: Text(
                 'Relays nearby Bluetooth devices (sensors, beacons) to Home Assistant, '
-                'like an ESPHome Bluetooth proxy. HA will discover "koti-tablet" '
+                'like an ESPHome Bluetooth proxy. HA will discover "${settings.deviceName}" '
                 'under Devices & services — add it there.'),
             value: settings.bluetoothProxyEnabled,
             onChanged: settings.setBluetoothProxyEnabled,

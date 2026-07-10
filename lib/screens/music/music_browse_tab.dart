@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/koti_theme.dart';
+import '../../widgets/glass_tab_strip.dart';
 import 'music_assistant_api.dart';
 import 'music_item_tile.dart';
 
@@ -82,12 +83,15 @@ class _MusicBrowseTabState extends State<MusicBrowseTab>
 
     return Column(
       children: [
-        TabBar(
-          controller: _typeController,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          tabs: [for (final t in _mediaTypes) Tab(text: _mediaTypeLabels[t])],
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: GlassTabStrip(
+            controller: _typeController,
+            labels: [for (final t in _mediaTypes) _mediaTypeLabels[t]!],
+            scrollable: true,
+          ),
         ),
+        const SizedBox(height: 8),
         if (_loading) const LinearProgressIndicator(minHeight: 2),
         if (_error != null)
           Padding(

@@ -98,8 +98,54 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     await _saveAndFinish(token);
   }
 
+  /// Runs once, right before this tablet is registered with Home Assistant
+  /// (mobile_app device + Bluetooth proxy + speaker all use this name) —
+  /// so a household with more than one Koti tablet can tell them apart in
+  /// HA from the start, instead of everything showing up as "Koti Tablet".
+  /// Skippable: the default (already unique, via a short device-id suffix)
+  /// works fine on its own.
+  Future<void> _promptDeviceName(SettingsStore settings) async {
+    final controller = TextEditingController(text: settings.deviceName);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Name this tablet'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Used to identify this tablet in Home Assistant — handy if you '
+              'have more than one (e.g. "Kitchen Tablet"). You can change it '
+              'later in Settings.',
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              decoration: const InputDecoration(border: OutlineInputBorder()),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context), child: const Text('Skip')),
+          FilledButton(
+              onPressed: () => Navigator.pop(context, controller.text.trim()),
+              child: const Text('Save')),
+        ],
+      ),
+    );
+    if (name != null && name.isNotEmpty) {
+      await settings.setDeviceName(name);
+    }
+  }
+
   Future<void> _saveAndFinish(String token) async {
     final settings = Provider.of<SettingsStore>(context, listen: false);
+    if (!mounted) return;
+    await _promptDeviceName(settings);
+    if (!mounted) return;
     await settings.setConnection(
       localUrl: widget.baseUrl,
       remoteUrl: widget.externalUrl,

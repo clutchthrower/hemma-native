@@ -8,6 +8,7 @@ import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.AudioManager
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.os.Build
@@ -25,6 +26,11 @@ class MainActivity : FlutterActivity() {
     private var scanCallback: ScanCallback? = null
     private var nsdManager: NsdManager? = null
     private var nsdListener: NsdManager.RegistrationListener? = null
+
+    // Separate NSD registration for the Koti player's own discovery
+    // advertisement, so it can run independently of the Bluetooth proxy's.
+    private var kotiNsdManager: NsdManager? = null
+    private var kotiNsdListener: NsdManager.RegistrationListener? = null
 
     private fun blePermissions(): Array<String> =
         if (Build.VERSION.SDK_INT >= 31)
@@ -104,6 +110,58 @@ class MainActivity : FlutterActivity() {
         nsdListener = null
     }
 
+    // Real Android system volume (STREAM_MUSIC), not the audio player's own
+    // gain — a media_player's "volume" needs to move the same slider the
+    // user's physical volume buttons do, or it silently multiplies against
+    // whatever the device happens to be set to.
+    private fun audioManager() = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+    private fun setMusicVolumePercent(percent: Int) {
+        val am = audioManager()
+        val max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        val level = ((percent.coerceIn(0, 100) / 100.0) * max).toInt().coerceIn(0, max)
+        am.setStreamVolume(AudioManager.STREAM_MUSIC, level, 0)
+    }
+
+    private fun getMusicVolumePercent(): Int {
+        val am = audioManager()
+        val max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        if (max <= 0) return 0
+        val current = am.getStreamVolume(AudioManager.STREAM_MUSIC)
+        return ((current.toDouble() / max) * 100).toInt().coerceIn(0, 100)
+    }
+
+    // Advertises this tablet as a Koti player over mDNS so the Koti Home
+    // Assistant integration can auto-discover it — no manual IP/password
+    // entry, matching the ESPHome-style zero-config pattern above.
+    private fun startKotiDiscovery(name: String, id: String, port: Int): String {
+        if (kotiNsdListener != null) return "ok"
+        val info = NsdServiceInfo().apply {
+            serviceName = name
+            serviceType = "_koti._tcp."
+            setPort(port)
+            setAttribute("id", id)
+            setAttribute("name", name)
+        }
+        kotiNsdListener = object : NsdManager.RegistrationListener {
+            override fun onServiceRegistered(i: NsdServiceInfo?) {}
+            override fun onRegistrationFailed(i: NsdServiceInfo?, e: Int) {}
+            override fun onServiceUnregistered(i: NsdServiceInfo?) {}
+            override fun onUnregistrationFailed(i: NsdServiceInfo?, e: Int) {}
+        }
+        kotiNsdManager = getSystemService(Context.NSD_SERVICE) as NsdManager
+        kotiNsdManager?.registerService(info, NsdManager.PROTOCOL_DNS_SD, kotiNsdListener)
+        return "ok"
+    }
+
+    private fun stopKotiDiscovery() {
+        try {
+            kotiNsdListener?.let { kotiNsdManager?.unregisterService(it) }
+        } catch (_: Exception) {
+        }
+        kotiNsdListener = null
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
@@ -178,6 +236,26 @@ class MainActivity : FlutterActivity() {
                         stopBleProxy()
                         result.success(null)
                     }
+                    "setMusicVolume" -> {
+                        setMusicVolumePercent(call.argument<Int>("percent") ?: 100)
+                        result.success(null)
+                    }
+                    "getMusicVolume" -> {
+                        result.success(getMusicVolumePercent())
+                    }
+                    "startKotiDiscovery" -> {
+                        result.success(
+                            startKotiDiscovery(
+                                call.argument<String>("name") ?: "Koti Tablet",
+                                call.argument<String>("id") ?: "",
+                                call.argument<Int>("port") ?: 8127
+                            )
+                        )
+                    }
+                    "stopKotiDiscovery" -> {
+                        stopKotiDiscovery()
+                        result.success(null)
+                    }
                     else -> result.notImplemented()
                 }
             }
@@ -185,6 +263,7 @@ class MainActivity : FlutterActivity() {
 
     override fun onDestroy() {
         stopBleProxy()
+        stopKotiDiscovery()
         super.onDestroy()
     }
 }

@@ -161,6 +161,10 @@ class _MusicNowPlayingTabState extends State<MusicNowPlayingTab> {
                 const SizedBox(width: 4),
                 IconButton.filled(
                   iconSize: 40,
+                  style: IconButton.styleFrom(
+                    backgroundColor: tokens.activeColor,
+                    foregroundColor: Colors.white,
+                  ),
                   icon: Icon(playing ? Icons.pause : Icons.play_arrow),
                   onPressed: () => call('media_play_pause'),
                 ),
@@ -192,13 +196,21 @@ class _MusicNowPlayingTabState extends State<MusicNowPlayingTab> {
                 children: [
                   Icon(Icons.volume_down, color: tokens.textSecondary, size: 20),
                   Expanded(
-                    child: Slider(
-                      value: (_dragVolume ?? volume).clamp(0.0, 1.0),
-                      onChanged: (v) => setState(() => _dragVolume = v),
-                      onChangeEnd: (v) {
-                        call('volume_set', {'volume_level': v});
-                        setState(() => _dragVolume = null);
-                      },
+                    child: SliderTheme(
+                      data: SliderThemeData(
+                        activeTrackColor: tokens.activeColor,
+                        inactiveTrackColor: tokens.iconCircleBackground,
+                        thumbColor: tokens.activeColor,
+                        overlayColor: tokens.activeColor.withValues(alpha: 0.2),
+                      ),
+                      child: Slider(
+                        value: (_dragVolume ?? volume).clamp(0.0, 1.0),
+                        onChanged: (v) => setState(() => _dragVolume = v),
+                        onChangeEnd: (v) {
+                          call('volume_set', {'volume_level': v});
+                          setState(() => _dragVolume = null);
+                        },
+                      ),
                     ),
                   ),
                   Icon(Icons.volume_up, color: tokens.textSecondary, size: 20),
@@ -208,6 +220,9 @@ class _MusicNowPlayingTabState extends State<MusicNowPlayingTab> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextButton.icon(
+                  style: TextButton.styleFrom(
+                    foregroundColor: off ? tokens.textSecondary : tokens.activeColor,
+                  ),
                   icon: Icon(Icons.power_settings_new,
                       color: off ? tokens.textSecondary : tokens.activeColor),
                   label: Text(off ? 'Turn on' : 'Turn off'),
@@ -215,6 +230,7 @@ class _MusicNowPlayingTabState extends State<MusicNowPlayingTab> {
                 ),
                 if (supportsGrouping)
                   TextButton.icon(
+                    style: TextButton.styleFrom(foregroundColor: tokens.textSecondary),
                     icon: Icon(Icons.speaker_group, color: tokens.textSecondary),
                     label: const Text('Group'),
                     onPressed: () => _showGroupSheet(context, store),

@@ -8,12 +8,15 @@ import '../models/room_config.dart';
 class KotiTopNav extends StatelessWidget {
   final List<RoomConfig> rooms;
 
-  /// Selected room id, or null when the Home tab is active.
+  /// Selected room id, or null when the Home tab is active (unless
+  /// [homeSelected] is overridden — e.g. while a non-room view like Music
+  /// is showing, so neither Home nor any room reads as selected).
   final String? selectedRoomId;
 
   /// Called with the tapped room, or null for the Home tab.
   final ValueChanged<RoomConfig?> onSelect;
   final VoidCallback onScenes;
+  final bool homeSelected;
 
   const KotiTopNav({
     super.key,
@@ -21,7 +24,8 @@ class KotiTopNav extends StatelessWidget {
     required this.selectedRoomId,
     required this.onSelect,
     required this.onScenes,
-  });
+    bool? homeSelected,
+  }) : homeSelected = homeSelected ?? (selectedRoomId == null);
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +42,7 @@ class KotiTopNav extends StatelessWidget {
           children: [
             _NavTab(
               label: 'Home',
-              selected: selectedRoomId == null,
+              selected: homeSelected,
               onTap: () => onSelect(null),
             ),
             for (final room in rooms)

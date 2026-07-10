@@ -14,7 +14,7 @@ import 'api/ha_registry.dart';
 import 'api/ha_rest_client.dart';
 import 'api/ha_websocket_client.dart';
 import 'screens/koti_splash_screen.dart';
-import 'speaker/kiosk_audio_server.dart';
+import 'speaker/koti_player_server.dart';
 import 'screens/update_screen.dart';
 import 'store/helper_store.dart';
 import 'store/settings_store.dart';
@@ -70,7 +70,7 @@ class _KotiAppState extends State<KotiApp> with WidgetsBindingObserver {
   final BleProxy _bleProxy = BleProxy();
   bool _bleProxySyncing = false;
 
-  KioskAudioServer? _speakerServer;
+  KotiPlayerServer? _speakerServer;
   bool _speakerSyncing = false;
 
   @override
@@ -107,7 +107,10 @@ class _KotiAppState extends State<KotiApp> with WidgetsBindingObserver {
     try {
       final want = widget.settings.bluetoothProxyEnabled;
       if (want && !_bleProxy.running) {
-        final status = await _bleProxy.start(deviceId: widget.settings.deviceId);
+        final status = await _bleProxy.start(
+          deviceId: widget.settings.deviceId,
+          deviceName: widget.settings.deviceName,
+        );
         if (status != 'ok') {
           await widget.settings.setBluetoothProxyEnabled(false);
         }
@@ -119,23 +122,23 @@ class _KotiAppState extends State<KotiApp> with WidgetsBindingObserver {
     }
   }
 
-  /// Starts/stops the tablet-as-speaker HTTP server to match the setting,
-  /// and pushes password/name changes into an already-running server
-  /// without restarting it. If binding the port fails (already in use,
-  /// permission denied), the toggle flips back off so it never lies about
-  /// what's running.
+  /// Starts/stops the tablet-as-speaker HTTP server + discovery
+  /// advertisement to match the setting, and re-announces an already-
+  /// running server under a new name if the user renames the device
+  /// without needing a restart. If binding the port fails (already in
+  /// use, permission denied), the toggle flips back off so it never lies
+  /// about what's running.
   Future<void> _syncSpeaker() async {
     if (_speakerSyncing) return;
     _speakerSyncing = true;
     try {
       final want = widget.settings.speakerEnabled;
-      final deviceName =
-          'Koti (${widget.settings.deviceId.substring(0, widget.settings.deviceId.length.clamp(0, 6))})';
+      final deviceName = widget.settings.deviceName;
       final server = _speakerServer;
       if (want && server == null) {
-        final newServer = KioskAudioServer(
-          password: widget.settings.speakerPassword,
-          deviceName: deviceName,
+        final newServer = KotiPlayerServer(
+          id: widget.settings.deviceId,
+          name: deviceName,
         );
         try {
           await newServer.start();
@@ -146,9 +149,8 @@ class _KotiAppState extends State<KotiApp> with WidgetsBindingObserver {
       } else if (!want && server != null) {
         await server.stop();
         _speakerServer = null;
-      } else if (want && server != null) {
-        server.password = widget.settings.speakerPassword;
-        server.deviceName = deviceName;
+      } else if (want && server != null && server.name != deviceName) {
+        await server.updateName(deviceName);
       }
     } finally {
       _speakerSyncing = false;
@@ -223,6 +225,7 @@ class _KotiAppState extends State<KotiApp> with WidgetsBindingObserver {
         baseUrl: url,
         accessToken: token,
         deviceId: widget.settings.deviceId,
+        deviceName: widget.settings.deviceName,
       );
       if (webhookId != null) await widget.settings.setHaWebhookId(webhookId);
     } catch (_) {

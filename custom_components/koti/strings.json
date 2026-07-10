@@ -1,0 +1,25 @@
+{
+  "config": {
+    "step": {
+      "discovery_confirm": {
+        "title": "Set up {name}",
+        "description": "Found a Koti tablet, \"{name}\", on your network. Add it as a media player?"
+      },
+      "user": {
+        "title": "Add a Koti player manually",
+        "description": "Only needed if auto-discovery didn't find your tablet. Enter its IP address (Settings → Device Name in the Koti app shows the tablet's own name).",
+        "data": {
+          "host": "Host or IP address",
+          "port": "Port"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Couldn't reach a Koti player at that address."
+    },
+    "abort": {
+      "already_configured": "This Koti player is already configured.",
+      "no_device_id": "The discovered device didn't report an id."
+    }
+  }
+}

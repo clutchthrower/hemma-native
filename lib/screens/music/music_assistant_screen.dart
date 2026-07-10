@@ -5,19 +5,22 @@ import '../../store/settings_store.dart';
 import '../../store/state_store.dart';
 import '../../theme/koti_theme.dart';
 import '../../widgets/entity_watcher.dart';
+import '../../widgets/glass_tab_strip.dart';
 import 'music_assistant_api.dart';
 import 'music_browse_tab.dart';
 import 'music_now_playing_tab.dart';
 import 'music_queue_tab.dart';
 import 'music_search_tab.dart';
 
-/// Full-page Music Assistant control screen (Settings → Features → Music
-/// Assistant): pick a speaker/group at the top, then Now Playing / Search /
-/// Browse / Queue underneath. Works against any `media_player` entity —
-/// MA-specific actions (search, browse, queue, play_media) go through the
-/// `music_assistant.*` HA services, so it needs Music Assistant installed,
-/// but doesn't care how each player got there (native or the Fully Kiosk
-/// player provider, if this tablet is set up as a speaker too).
+/// The Music tab's content: pick a speaker/group at the top, then Now
+/// Playing / Search / Browse / Queue underneath. Lives inside [AppShell]'s
+/// own swipe-navigation Stack (to the left of Home) rather than owning a
+/// Scaffold/AppBar of its own — so it paints its own full-bleed background
+/// and leaves clearance for the shell's floating top nav instead. Works
+/// against any `media_player` entity — MA-specific actions (search, browse,
+/// queue, play_media) go through the `music_assistant.*` HA services, so it
+/// needs Music Assistant installed, but doesn't care how each player got
+/// there (native or this tablet's own Koti speaker, if set up as one).
 class MusicAssistantScreen extends StatefulWidget {
   const MusicAssistantScreen({super.key});
 
@@ -56,43 +59,49 @@ class _MusicAssistantScreenState extends State<MusicAssistantScreen>
   @override
   Widget build(BuildContext context) {
     final api = _api;
+    final tokens = KotiTheme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Music'),
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabs: const [
-            Tab(text: 'Now Playing'),
-            Tab(text: 'Search'),
-            Tab(text: 'Browse'),
-            Tab(text: 'Queue'),
-          ],
+    return Container(
+      color: tokens.dialogBackground,
+      child: SafeArea(
+        bottom: false,
+        // Clears the shell's floating hamburger/nav-pill/clock row, which
+        // floats on top of this content rather than reserving space for it.
+        child: Padding(
+          padding: EdgeInsets.only(top: tokens.navHeight),
+          child: Column(
+            children: [
+              const SizedBox(height: 8),
+              _PlayerSelector(
+                selected: _selectedPlayer,
+                onSelect: (id) => setState(() => _selectedPlayer = id),
+              ),
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: GlassTabStrip(
+                  controller: _tabController,
+                  labels: const ['Now Playing', 'Search', 'Browse', 'Queue'],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: _selectedPlayer == null
+                    ? const _EmptyState()
+                    : TabBarView(
+                        controller: _tabController,
+                        children: [
+                          MusicNowPlayingTab(
+                              entityId: _selectedPlayer!, api: api),
+                          MusicSearchTab(entityId: _selectedPlayer!, api: api),
+                          MusicBrowseTab(entityId: _selectedPlayer!, api: api),
+                          MusicQueueTab(entityId: _selectedPlayer!, api: api),
+                        ],
+                      ),
+              ),
+            ],
+          ),
         ),
-      ),
-      body: Column(
-        children: [
-          _PlayerSelector(
-            selected: _selectedPlayer,
-            onSelect: (id) => setState(() => _selectedPlayer = id),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: _selectedPlayer == null
-                ? const _EmptyState()
-                : TabBarView(
-                    controller: _tabController,
-                    children: [
-                      MusicNowPlayingTab(
-                          entityId: _selectedPlayer!, api: api),
-                      MusicSearchTab(entityId: _selectedPlayer!, api: api),
-                      MusicBrowseTab(entityId: _selectedPlayer!, api: api),
-                      MusicQueueTab(entityId: _selectedPlayer!, api: api),
-                    ],
-                  ),
-          ),
-        ],
       ),
     );
   }
@@ -151,14 +160,23 @@ class _PlayerSelector extends StatelessWidget {
                       padding: const EdgeInsets.only(right: 8),
                       child: ChoiceChip(
                         label: Text(name),
+                        labelStyle: TextStyle(
+                          fontFamily: 'Hanken Grotesk',
+                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: isSelected ? Colors.white : Colors.white70,
+                        ),
                         selected: isSelected,
+                        showCheckmark: false,
                         avatar: playing
                             ? Icon(Icons.graphic_eq,
                                 size: 18,
-                                color: isSelected
-                                    ? null
-                                    : tokens.activeColor)
+                                color: isSelected ? Colors.white : tokens.activeColor)
                             : null,
+                        backgroundColor: const Color.fromRGBO(0, 0, 0, 0.28),
+                        selectedColor: const Color.fromRGBO(255, 255, 255, 0.22),
+                        side: BorderSide.none,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(9999)),
                         onSelected: (_) => onSelect(id),
                       ),
                     );

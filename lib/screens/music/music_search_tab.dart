@@ -61,22 +61,39 @@ class _MusicSearchTabState extends State<MusicSearchTab>
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: TextField(
             controller: _controller,
             textInputAction: TextInputAction.search,
             onSubmitted: (_) => _search(),
+            style: TextStyle(color: tokens.textPrimary),
+            cursorColor: tokens.activeColor,
             decoration: InputDecoration(
               hintText: 'Search tracks, artists, albums…',
-              prefixIcon: const Icon(Icons.search),
+              hintStyle: TextStyle(color: tokens.textSecondary),
+              prefixIcon: Icon(Icons.search, color: tokens.textSecondary),
               suffixIcon: IconButton(
-                icon: const Icon(Icons.arrow_forward),
+                icon: Icon(Icons.arrow_forward, color: tokens.textSecondary),
                 onPressed: _search,
               ),
-              border: const OutlineInputBorder(),
+              filled: true,
+              fillColor: tokens.entityBackground,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide(color: tokens.activeColor, width: 1.5),
+              ),
             ),
           ),
         ),
+        const SizedBox(height: 8),
         if (_loading) const LinearProgressIndicator(minHeight: 2),
         if (_error != null)
           Padding(

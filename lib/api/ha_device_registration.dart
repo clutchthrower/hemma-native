@@ -15,6 +15,7 @@ class HaDeviceRegistration {
     required String baseUrl,
     required String accessToken,
     required String deviceId,
+    required String deviceName,
   }) async {
     final resp = await http
         .post(
@@ -28,7 +29,7 @@ class HaDeviceRegistration {
             'app_id': 'com.koti.dashboard',
             'app_name': 'Koti',
             'app_version': '1.0.0',
-            'device_name': 'Koti Tablet',
+            'device_name': deviceName,
             'manufacturer': 'Koti',
             'model': 'Wall Dashboard',
             'os_name': Platform.operatingSystem,

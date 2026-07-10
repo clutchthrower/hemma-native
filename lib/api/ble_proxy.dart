@@ -30,20 +30,34 @@ class BleProxy {
     return pairs.join(':');
   }
 
-  Future<String> start({required String deviceId}) async {
+  /// mDNS service names must be unique per network and hostname-safe.
+  /// Slugifying the user's device name isn't enough on its own — two
+  /// tablets could still share a name (or both keep the default) — so the
+  /// device id suffix is always appended regardless of what the user typed.
+  static String slugFrom(String deviceName, String deviceId) {
+    final slug = deviceName
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'^-+|-+$'), '');
+    final shortId = deviceId.length >= 6 ? deviceId.substring(0, 6) : deviceId;
+    return '${slug.isEmpty ? 'koti-tablet' : slug}-$shortId';
+  }
+
+  Future<String> start({required String deviceId, required String deviceName}) async {
     if (running) return 'ok';
     final mac = macFrom(deviceId);
+    final name = slugFrom(deviceName, deviceId);
     final server = EsphomeServer(
-      name: 'koti-tablet',
-      friendlyName: 'Koti Tablet',
+      name: name,
+      friendlyName: deviceName,
       macAddress: mac,
       bluetoothMacAddress: macFrom(deviceId, variant: 1),
     );
     await server.start();
 
     final status = await _channel.invokeMethod<String>('startBleProxy', {
-          'name': 'koti-tablet',
-          'friendlyName': 'Koti Tablet',
+          'name': name,
+          'friendlyName': deviceName,
           'mac': mac,
           'port': EsphomeServer.port,
         }) ??

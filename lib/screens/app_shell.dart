@@ -13,6 +13,7 @@ import '../theme/koti_theme.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/clock_widget.dart';
 import 'home_overview_screen.dart';
+import 'music/music_assistant_screen.dart';
 import 'room_screen.dart';
 import 'screensaver_screen.dart';
 
@@ -32,8 +33,11 @@ class _AppShellState extends State<AppShell> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _editMode = EditModeController();
 
-  /// Selected room id; null means the Home tab.
+  /// Selected room id; null means the Home tab (or Music, see [_showMusic]).
   String? _roomId;
+  /// Only meaningful when [_roomId] is null — Music sits one swipe to the
+  /// left of Home, outside the room sequence.
+  bool _showMusic = false;
   Timer? _idleTimer;
   bool _showScreensaver = false;
 
@@ -63,18 +67,25 @@ class _AppShellState extends State<AppShell> {
   }
 
   /// Swipe left/right anywhere on the background steps through
-  /// Home → room1 → room2 … (scrollable rows like the card strip keep
-  /// their own gesture and are unaffected).
+  /// Music → Home → room1 → room2 … (scrollable rows like the card strip
+  /// keep their own gesture and are unaffected).
   void _onHorizontalSwipe(DragEndDetails details) {
     if (_editMode.editing) return;
     final v = details.primaryVelocity ?? 0;
     if (v.abs() < 250) return;
     final rooms = widget.settings.rooms;
-    // Position in the sequence: -1 = Home, otherwise the room index.
-    var index = _roomId == null ? -1 : rooms.indexWhere((r) => r.id == _roomId);
+    final musicEnabled = widget.settings.musicAssistantEnabled;
+    // Position in the sequence: -2 = Music, -1 = Home, otherwise room index.
+    var index = _showMusic
+        ? -2
+        : (_roomId == null ? -1 : rooms.indexWhere((r) => r.id == _roomId));
     index += v < 0 ? 1 : -1; // swipe left = forward
-    if (index < -1 || index >= rooms.length) return;
-    setState(() => _roomId = index == -1 ? null : rooms[index].id);
+    final minIndex = musicEnabled ? -2 : -1;
+    if (index < minIndex || index >= rooms.length) return;
+    setState(() {
+      _showMusic = index == -2;
+      _roomId = index >= 0 ? rooms[index].id : null;
+    });
   }
 
   Future<void> _editBackground(RoomConfig? currentRoom) async {
@@ -107,6 +118,8 @@ class _AppShellState extends State<AppShell> {
       if (r.id == _roomId) currentRoom = r;
     }
     final theme = context.watch<ThemeController>();
+    final tokens = KotiTheme.of(context);
+    final musicEnabled = widget.settings.musicAssistantEnabled;
 
     return ChangeNotifierProvider<EditModeController>.value(
       value: _editMode,
@@ -122,9 +135,11 @@ class _AppShellState extends State<AppShell> {
                 child: GestureDetector(
                   behavior: HitTestBehavior.translucent,
                   onHorizontalDragEnd: _onHorizontalSwipe,
-                  child: currentRoom != null
-                      ? RoomView(room: currentRoom)
-                      : const HomeView(),
+                  child: _showMusic
+                      ? const MusicAssistantScreen()
+                      : (currentRoom != null
+                          ? RoomView(room: currentRoom)
+                          : const HomeView()),
                 ),
               ),
               // Top chrome: hamburger / nav tabs / clock, like the
@@ -152,13 +167,28 @@ class _AppShellState extends State<AppShell> {
                                   onPressed: () =>
                                       _scaffoldKey.currentState?.openDrawer(),
                                 ),
+                                if (musicEnabled)
+                                  IconButton(
+                                    tooltip: 'Music',
+                                    icon: Icon(Icons.music_note,
+                                        color: _showMusic
+                                            ? tokens.activeColor
+                                            : Colors.white70),
+                                    onPressed: () => setState(() {
+                                      _showMusic = true;
+                                      _roomId = null;
+                                    }),
+                                  ),
                                 Expanded(
                                   child: Center(
                                     child: KotiTopNav(
                                       rooms: rooms,
                                       selectedRoomId: _roomId,
-                                      onSelect: (room) =>
-                                          setState(() => _roomId = room?.id),
+                                      homeSelected: !_showMusic && _roomId == null,
+                                      onSelect: (room) => setState(() {
+                                        _showMusic = false;
+                                        _roomId = room?.id;
+                                      }),
                                       onScenes: () => showScenesPopup(context),
                                     ),
                                   ),
