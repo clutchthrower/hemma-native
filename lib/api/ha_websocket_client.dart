@@ -176,6 +176,44 @@ class HaWebSocketClient {
     });
   }
 
+  /// For "response" services (e.g. Music Assistant's search/get_library/
+  /// get_queue) that return data rather than just acting. Returns the
+  /// `result.response` payload, or an empty map if the service gave none.
+  Future<Map<String, dynamic>> callServiceForResponse(
+    String domain,
+    String service, {
+    Map<String, dynamic>? serviceData,
+    Map<String, dynamic>? target,
+  }) async {
+    final msg = await sendCommand({
+      'type': 'call_service',
+      'domain': domain,
+      'service': service,
+      if (serviceData != null) 'service_data': serviceData,
+      if (target != null) 'target': target,
+      'return_response': true,
+    });
+    if (msg['success'] != true) {
+      final error = msg['error'] as Map<String, dynamic>?;
+      throw HaServiceException(
+          error?['message'] as String? ?? 'Service call failed');
+    }
+    final result = msg['result'] as Map<String, dynamic>?;
+    return (result?['response'] as Map<String, dynamic>?) ?? const {};
+  }
+
+  /// Lists config entries (admin API) — used to resolve the `config_entry_id`
+  /// some services require (e.g. Music Assistant's search/get_library).
+  Future<List<Map<String, dynamic>>> getConfigEntries({String? domain}) async {
+    final msg = await sendCommand({
+      'type': 'config_entries/get',
+      if (domain != null) 'domain': domain,
+    });
+    final result = msg['result'];
+    if (result is! List) return const [];
+    return result.whereType<Map>().map((m) => m.cast<String, dynamic>()).toList();
+  }
+
   void _flushQueue() {
     for (final payload in _resubscribeQueue) {
       final id = _nextId();
@@ -201,4 +239,14 @@ class HaWebSocketClient {
     _statusController.close();
     _eventController.close();
   }
+}
+
+/// A "response" service call that HA rejected (bad/missing fields, no
+/// matching entity, etc.) — carries HA's own error message so the UI can
+/// show exactly what went wrong instead of a silent empty result.
+class HaServiceException implements Exception {
+  final String message;
+  HaServiceException(this.message);
+  @override
+  String toString() => message;
 }

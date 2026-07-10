@@ -28,6 +28,10 @@ class SettingsStore extends ChangeNotifier {
   static const _kWebhookId = 'koti_ha_webhook_id';
   static const _kUpdateChecks = 'koti_update_checks';
   static const _kBleProxy = 'koti_ble_proxy';
+  static const _kMusicAssistant = 'koti_music_assistant';
+  static const _kSpeakerEnabled = 'koti_speaker_enabled';
+  static const _kSpeakerPassword = 'koti_speaker_password';
+  static const _kSelfSpeakerEntityId = 'koti_self_speaker_entity_id';
 
   String localUrl = '';
   String remoteUrl = '';
@@ -49,10 +53,23 @@ class SettingsStore extends ChangeNotifier {
   String deviceId = '';
   String? haWebhookId;
 
-  /// Feature switches: automatic update checks (GitHub releases) and the
-  /// ESPHome-style Bluetooth proxy.
+  /// Feature switches: automatic update checks (GitHub releases), the
+  /// ESPHome-style Bluetooth proxy, and the full-page Music Assistant
+  /// control screen (off by default — most users don't run MA).
   bool updateChecksEnabled = true;
   bool bluetoothProxyEnabled = false;
+  bool musicAssistantEnabled = false;
+
+  /// "Tablet as a speaker": runs a local server that mimics Fully Kiosk
+  /// Browser's audio REST API, so Music Assistant's built-in Fully Kiosk
+  /// player provider can control this device — no custom HA integration
+  /// needed. [speakerPassword] is generated on first enable (MA requires
+  /// one); [selfSpeakerEntityId] is set once the user confirms which HA
+  /// entity Music Assistant created for it, so the Music screen can
+  /// default to controlling this device.
+  bool speakerEnabled = false;
+  String speakerPassword = '';
+  String? selfSpeakerEntityId;
 
   String? get accessToken => _accessToken;
 
@@ -106,6 +123,10 @@ class SettingsStore extends ChangeNotifier {
     haWebhookId = prefs.getString(_kWebhookId);
     updateChecksEnabled = prefs.getBool(_kUpdateChecks) ?? true;
     bluetoothProxyEnabled = prefs.getBool(_kBleProxy) ?? false;
+    musicAssistantEnabled = prefs.getBool(_kMusicAssistant) ?? false;
+    speakerEnabled = prefs.getBool(_kSpeakerEnabled) ?? false;
+    speakerPassword = prefs.getString(_kSpeakerPassword) ?? '';
+    selfSpeakerEntityId = prefs.getString(_kSelfSpeakerEntityId);
     notifyListeners();
   }
 
@@ -120,6 +141,46 @@ class SettingsStore extends ChangeNotifier {
     bluetoothProxyEnabled = v;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kBleProxy, v);
+    notifyListeners();
+  }
+
+  Future<void> setMusicAssistantEnabled(bool v) async {
+    musicAssistantEnabled = v;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kMusicAssistant, v);
+    notifyListeners();
+  }
+
+  Future<void> setSpeakerEnabled(bool v) async {
+    speakerEnabled = v;
+    final prefs = await SharedPreferences.getInstance();
+    // Music Assistant requires a password for its Fully Kiosk player
+    // provider — generate one the first time this is turned on so the
+    // feature works without an extra manual step.
+    if (v && speakerPassword.isEmpty) {
+      final rng = Random.secure();
+      speakerPassword = List.generate(8, (_) => rng.nextInt(10)).join();
+      await prefs.setString(_kSpeakerPassword, speakerPassword);
+    }
+    await prefs.setBool(_kSpeakerEnabled, v);
+    notifyListeners();
+  }
+
+  Future<void> setSpeakerPassword(String v) async {
+    speakerPassword = v;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_kSpeakerPassword, v);
+    notifyListeners();
+  }
+
+  Future<void> setSelfSpeakerEntityId(String? id) async {
+    selfSpeakerEntityId = id;
+    final prefs = await SharedPreferences.getInstance();
+    if (id == null) {
+      await prefs.remove(_kSelfSpeakerEntityId);
+    } else {
+      await prefs.setString(_kSelfSpeakerEntityId, id);
+    }
     notifyListeners();
   }
 

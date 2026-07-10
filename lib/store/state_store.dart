@@ -133,6 +133,37 @@ class StateStore extends ChangeNotifier {
     }
   }
 
+  /// For "response" services (search/browse/queue lookups) that return
+  /// data rather than just acting on an entity.
+  Future<Map<String, dynamic>> callServiceForResponse(
+    String domain,
+    String service, {
+    Map<String, dynamic>? data,
+    String? entityId,
+  }) async {
+    if (ws.status == HaConnectionStatus.connected) {
+      return ws.callServiceForResponse(
+        domain,
+        service,
+        serviceData: data,
+        target: entityId != null ? {'entity_id': entityId} : null,
+      );
+    }
+    return rest.callServiceForResponse(domain, service, data: {
+      ...?data,
+      if (entityId != null) 'entity_id': entityId,
+    });
+  }
+
+  /// Admin API, WebSocket-only — used to resolve a `config_entry_id` some
+  /// services require (e.g. Music Assistant's search/get_library).
+  Future<List<Map<String, dynamic>>> getConfigEntries({String? domain}) {
+    if (ws.status != HaConnectionStatus.connected) {
+      throw StateError('Not connected to Home Assistant');
+    }
+    return ws.getConfigEntries(domain: domain);
+  }
+
   Future<void> forceRefresh() async {
     final list = await rest.states();
     for (final raw in list) {

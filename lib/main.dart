@@ -14,6 +14,7 @@ import 'api/ha_registry.dart';
 import 'api/ha_rest_client.dart';
 import 'api/ha_websocket_client.dart';
 import 'screens/koti_splash_screen.dart';
+import 'speaker/kiosk_audio_server.dart';
 import 'screens/update_screen.dart';
 import 'store/helper_store.dart';
 import 'store/settings_store.dart';
@@ -69,6 +70,9 @@ class _KotiAppState extends State<KotiApp> with WidgetsBindingObserver {
   final BleProxy _bleProxy = BleProxy();
   bool _bleProxySyncing = false;
 
+  KioskAudioServer? _speakerServer;
+  bool _speakerSyncing = false;
+
   @override
   void initState() {
     super.initState();
@@ -91,6 +95,7 @@ class _KotiAppState extends State<KotiApp> with WidgetsBindingObserver {
         widget.settings.accessToken != _connectedToken;
     if (changed) _connect();
     unawaited(_syncBleProxy());
+    unawaited(_syncSpeaker());
   }
 
   /// Starts/stops the Bluetooth proxy to match the setting. If starting
@@ -114,6 +119,42 @@ class _KotiAppState extends State<KotiApp> with WidgetsBindingObserver {
     }
   }
 
+  /// Starts/stops the tablet-as-speaker HTTP server to match the setting,
+  /// and pushes password/name changes into an already-running server
+  /// without restarting it. If binding the port fails (already in use,
+  /// permission denied), the toggle flips back off so it never lies about
+  /// what's running.
+  Future<void> _syncSpeaker() async {
+    if (_speakerSyncing) return;
+    _speakerSyncing = true;
+    try {
+      final want = widget.settings.speakerEnabled;
+      final deviceName =
+          'Koti (${widget.settings.deviceId.substring(0, widget.settings.deviceId.length.clamp(0, 6))})';
+      final server = _speakerServer;
+      if (want && server == null) {
+        final newServer = KioskAudioServer(
+          password: widget.settings.speakerPassword,
+          deviceName: deviceName,
+        );
+        try {
+          await newServer.start();
+          _speakerServer = newServer;
+        } catch (_) {
+          await widget.settings.setSpeakerEnabled(false);
+        }
+      } else if (!want && server != null) {
+        await server.stop();
+        _speakerServer = null;
+      } else if (want && server != null) {
+        server.password = widget.settings.speakerPassword;
+        server.deviceName = deviceName;
+      }
+    } finally {
+      _speakerSyncing = false;
+    }
+  }
+
   Future<void> _init() async {
     await _themeController.load();
     await _connect();
@@ -124,6 +165,7 @@ class _KotiAppState extends State<KotiApp> with WidgetsBindingObserver {
     _updateTimer = Timer.periodic(
         const Duration(hours: 6), (_) => unawaited(_checkForUpdate()));
     unawaited(_syncBleProxy());
+    unawaited(_syncSpeaker());
   }
 
   Future<void> _checkForUpdate() async {

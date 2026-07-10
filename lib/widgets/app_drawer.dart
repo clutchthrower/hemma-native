@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../api/app_update.dart';
 import '../models/room_config.dart';
 import '../screens/home_overview_screen.dart';
+import '../screens/music/music_assistant_screen.dart';
 import '../screens/update_screen.dart';
 import '../store/settings_store.dart';
 import '../store/state_store.dart';
@@ -62,7 +63,7 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = KotiTheme.of(context);
-    final settings = Provider.of<SettingsStore>(context, listen: false);
+    final settings = context.watch<SettingsStore>();
 
     return Drawer(
       width: 270,
@@ -114,6 +115,12 @@ class AppDrawer extends StatelessWidget {
                       ),
                   ],
                   const _DrawerDivider(),
+                  if (settings.musicAssistantEnabled)
+                    _DrawerItem(
+                      icon: Icons.library_music_outlined,
+                      label: 'Music',
+                      onTap: () => _push(context, const MusicAssistantScreen()),
+                    ),
                   _DrawerItem(
                     icon: Icons.meeting_room_outlined,
                     label: 'Rooms',
