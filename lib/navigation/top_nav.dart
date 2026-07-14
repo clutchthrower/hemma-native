@@ -29,36 +29,47 @@ class KotiTopNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Home and Scenes stay put at either end; only the room tabs between
+    // them scroll — so there's always a stable "swipe left for Home, right
+    // for Scenes" landmark regardless of how many rooms are configured.
     return Container(
       decoration: BoxDecoration(
         color: const Color.fromRGBO(0, 0, 0, 0.28),
         borderRadius: BorderRadius.circular(9999),
       ),
       padding: const EdgeInsets.all(5),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _NavTab(
-              label: 'Home',
-              selected: homeSelected,
-              onTap: () => onSelect(null),
-            ),
-            for (final room in rooms)
-              _NavTab(
-                label: room.name,
-                selected: room.id == selectedRoomId,
-                onTap: () => onSelect(room),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _NavTab(
+            label: 'Home',
+            selected: homeSelected,
+            onTap: () => onSelect(null),
+          ),
+          if (rooms.isNotEmpty)
+            Flexible(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final room in rooms)
+                      _NavTab(
+                        label: room.name,
+                        selected: room.id == selectedRoomId,
+                        onTap: () => onSelect(room),
+                      ),
+                  ],
+                ),
               ),
-            _NavTab(
-              label: 'Scenes',
-              selected: false,
-              trailing: const Icon(Icons.expand_more, size: 18, color: Colors.white70),
-              onTap: onScenes,
             ),
-          ],
-        ),
+          _NavTab(
+            label: 'Scenes',
+            selected: false,
+            trailing: const Icon(Icons.expand_more, size: 18, color: Colors.white70),
+            onTap: onScenes,
+          ),
+        ],
       ),
     );
   }

@@ -214,6 +214,17 @@ class HaWebSocketClient {
     return result.whereType<Map>().map((m) => m.cast<String, dynamic>()).toList();
   }
 
+  /// Admin API, WebSocket-only — used to find an entity that shares a
+  /// device with a given entity but isn't itself returned by get_states
+  /// filtering alone (e.g. Music Assistant's per-player "favorite" button,
+  /// resolved by matching device_id — see MusicFavoriteResolver).
+  Future<List<Map<String, dynamic>>> getEntityRegistry() async {
+    final msg = await sendCommand({'type': 'config/entity_registry/list'});
+    final result = msg['result'];
+    if (result is! List) return const [];
+    return result.whereType<Map>().map((m) => m.cast<String, dynamic>()).toList();
+  }
+
   void _flushQueue() {
     for (final payload in _resubscribeQueue) {
       final id = _nextId();

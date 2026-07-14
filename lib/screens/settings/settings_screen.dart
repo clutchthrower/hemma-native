@@ -6,8 +6,8 @@ import 'advanced_settings_page.dart';
 import 'appearance_settings_page.dart';
 import 'connection_settings_page.dart';
 import 'display_settings_page.dart';
+import 'music_assistant_settings_page.dart';
 import 'rooms_settings_page.dart';
-import 'speaker_settings_page.dart';
 
 /// Full settings hub. The sidebar links to the common pages directly, but
 /// everything must also be reachable from here — this is the only settings
@@ -98,12 +98,14 @@ class SettingsScreen extends StatelessWidget {
                 .push(MaterialPageRoute(builder: (_) => const AdvancedSettingsPage())),
           ),
           ListTile(
-            leading: const Icon(Icons.speaker_outlined),
-            title: const Text('Speaker'),
-            subtitle: Text(settings.speakerEnabled ? 'Enabled' : 'Use this tablet as a speaker'),
+            leading: const Icon(Icons.library_music_outlined),
+            title: const Text('Music Assistant'),
+            subtitle: Text(settings.musicAssistantEnabled
+                ? (settings.speakerEnabled ? 'On + Speaker' : 'On')
+                : 'Swipeable Music page, and use this tablet as a speaker'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => const SpeakerSettingsPage())),
+                .push(MaterialPageRoute(builder: (_) => const MusicAssistantSettingsPage())),
           ),
           const Divider(),
           Padding(
@@ -131,15 +133,6 @@ class SettingsScreen extends StatelessWidget {
                 'under Devices & services — add it there.'),
             value: settings.bluetoothProxyEnabled,
             onChanged: settings.setBluetoothProxyEnabled,
-          ),
-          SwitchListTile(
-            secondary: const Icon(Icons.library_music_outlined),
-            title: const Text('Music Assistant'),
-            subtitle: const Text(
-                'Adds a swipeable Music page (left of Home): player/group '
-                'selection, search, library browsing, queue, and artwork.'),
-            value: settings.musicAssistantEnabled,
-            onChanged: settings.setMusicAssistantEnabled,
           ),
         ],
       ),

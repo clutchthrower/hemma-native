@@ -9,13 +9,21 @@ import '../../theme/koti_theme.dart';
 import '../../theme/tokens.dart';
 import '../../utils/device_mode.dart';
 import '../../widgets/entity_watcher.dart';
+import '../../widgets/koti_icon.dart';
 import 'music_assistant_api.dart';
+import 'music_players_popup.dart';
 
 class MusicNowPlayingTab extends StatefulWidget {
   final String entityId;
   final MusicAssistantApi api;
+  final ValueChanged<String> onSelectPlayer;
 
-  const MusicNowPlayingTab({super.key, required this.entityId, required this.api});
+  const MusicNowPlayingTab({
+    super.key,
+    required this.entityId,
+    required this.api,
+    required this.onSelectPlayer,
+  });
 
   @override
   State<MusicNowPlayingTab> createState() => _MusicNowPlayingTabState();
@@ -24,6 +32,7 @@ class MusicNowPlayingTab extends StatefulWidget {
 class _MusicNowPlayingTabState extends State<MusicNowPlayingTab> {
   double? _dragVolume;
   Timer? _positionTicker;
+  String? _favoriteButtonId;
 
   @override
   void initState() {
@@ -32,6 +41,35 @@ class _MusicNowPlayingTabState extends State<MusicNowPlayingTab> {
     // bar doesn't sit frozen between MA's periodic position reports.
     _positionTicker =
         Timer.periodic(const Duration(seconds: 1), (_) => setState(() {}));
+    _resolveFavoriteButton();
+  }
+
+  @override
+  void didUpdateWidget(covariant MusicNowPlayingTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.entityId != widget.entityId) {
+      _favoriteButtonId = null;
+      _resolveFavoriteButton();
+    }
+  }
+
+  Future<void> _resolveFavoriteButton() async {
+    final requestedFor = widget.entityId;
+    final id = await widget.api.resolveFavoriteButton(requestedFor);
+    // Guard against a stale response landing after the player changed again.
+    if (mounted && widget.entityId == requestedFor) {
+      setState(() => _favoriteButtonId = id);
+    }
+  }
+
+  Future<void> _markFavorite() async {
+    final buttonId = _favoriteButtonId;
+    if (buttonId == null) return;
+    await widget.api.pressFavoriteButton(buttonId);
+    if (mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Added to favorites')));
+    }
   }
 
   @override
@@ -62,6 +100,7 @@ class _MusicNowPlayingTabState extends State<MusicNowPlayingTab> {
         final artist = entity?.attr<String>('media_artist', '');
         final album = entity?.attr<String>('media_album_name', '');
         final volume = entity?.attrDouble('volume_level');
+        final muted = entity?.attributes['is_volume_muted'] as bool? ?? false;
         final shuffle = entity?.attributes['shuffle'] as bool?;
         final repeat = entity?.attr<String>('repeat', 'off');
         final picture = entity?.attr<String>('entity_picture', '');
@@ -107,6 +146,7 @@ class _MusicNowPlayingTabState extends State<MusicNowPlayingTab> {
           supportsGrouping: supportsGrouping,
           onPower: () => call(off ? 'turn_on' : 'turn_off'),
           onGroup: supportsGrouping ? () => _showGroupSheet(context, store) : null,
+          onFavorite: _favoriteButtonId == null ? null : _markFavorite,
           centered: !sideBySide,
         );
 
@@ -136,16 +176,18 @@ class _MusicNowPlayingTabState extends State<MusicNowPlayingTab> {
                   }),
         );
 
-        final volumeRow = volume == null
-            ? null
-            : _VolumeRow(
-                volume: _dragVolume ?? volume,
-                onChanged: (v) => setState(() => _dragVolume = v),
-                onChangeEnd: (v) {
-                  call('volume_set', {'volume_level': v});
-                  setState(() => _dragVolume = null);
-                },
-              );
+        final volumeRow = _VolumeRow(
+          volume: volume == null ? null : (_dragVolume ?? volume),
+          muted: muted,
+          onChanged: (v) => setState(() => _dragVolume = v),
+          onChangeEnd: (v) {
+            call('volume_set', {'volume_level': v});
+            setState(() => _dragVolume = null);
+          },
+          onToggleMute: () => call('volume_mute', {'is_volume_muted': !muted}),
+          onOpenPlayers: () =>
+              showMusicPlayersPopup(context, selected: widget.entityId, onSelect: widget.onSelectPlayer),
+        );
 
         if (sideBySide) {
           return ListView(
@@ -175,7 +217,8 @@ class _MusicNowPlayingTabState extends State<MusicNowPlayingTab> {
               progressBlock,
               const SizedBox(height: 18),
               transport,
-              if (volumeRow != null) ...[const SizedBox(height: 18), volumeRow],
+              const SizedBox(height: 18),
+              volumeRow,
             ],
           );
         }
@@ -192,7 +235,8 @@ class _MusicNowPlayingTabState extends State<MusicNowPlayingTab> {
             progressBlock,
             const SizedBox(height: 14),
             transport,
-            if (volumeRow != null) ...[const SizedBox(height: 14), volumeRow],
+            const SizedBox(height: 14),
+            volumeRow,
           ],
         );
       },
@@ -369,12 +413,18 @@ class _TitleBlock extends StatelessWidget {
 
 /// Small circular icon buttons under the title — HOMEii Flow's
 /// favorite/playlist/share row, scoped to the actions this app actually
-/// supports (power, group) rather than inventing unsupported ones.
+/// supports (power, favorite, group) rather than inventing unsupported
+/// ones. Favorite only shows when [onFavorite] is non-null — HA's
+/// music_assistant integration only exposes it as a per-player `button`
+/// entity (confirmed against the actual integration source), which some
+/// setups won't have (e.g. a non-admin account can't resolve it, or the
+/// entity's been disabled) — see MusicAssistantApi.resolveFavoriteButton.
 class _ActionIconRow extends StatelessWidget {
   final bool off;
   final bool supportsGrouping;
   final VoidCallback onPower;
   final VoidCallback? onGroup;
+  final VoidCallback? onFavorite;
   final bool centered;
 
   const _ActionIconRow({
@@ -382,6 +432,7 @@ class _ActionIconRow extends StatelessWidget {
     required this.supportsGrouping,
     required this.onPower,
     required this.onGroup,
+    required this.onFavorite,
     required this.centered,
   });
 
@@ -397,6 +448,15 @@ class _ActionIconRow extends StatelessWidget {
           active: !off,
           onTap: onPower,
         ),
+        if (onFavorite != null) ...[
+          const SizedBox(width: 10),
+          _RoundIconButton(
+            icon: Icons.favorite_border,
+            tooltip: 'Add to favorites',
+            active: false,
+            onTap: onFavorite,
+          ),
+        ],
         if (supportsGrouping) ...[
           const SizedBox(width: 10),
           _RoundIconButton(
@@ -411,24 +471,29 @@ class _ActionIconRow extends StatelessWidget {
   }
 }
 
+/// Either [icon] (a Material icon) or [assetIcon] (a bundled SVG name, for
+/// icons like the speaker-group glyph Material doesn't have) must be given.
 class _RoundIconButton extends StatelessWidget {
   static const _size = 36.0;
 
-  final IconData icon;
+  final IconData? icon;
+  final String? assetIcon;
   final String tooltip;
   final bool active;
   final VoidCallback? onTap;
 
   const _RoundIconButton({
-    required this.icon,
+    this.icon,
+    this.assetIcon,
     required this.tooltip,
     required this.active,
     required this.onTap,
-  });
+  }) : assert(icon != null || assetIcon != null);
 
   @override
   Widget build(BuildContext context) {
     final tokens = KotiTheme.of(context);
+    final color = active ? tokens.activeColor : tokens.textSecondary;
     return Tooltip(
       message: tooltip,
       child: Material(
@@ -442,9 +507,11 @@ class _RoundIconButton extends StatelessWidget {
           child: SizedBox(
             width: _size,
             height: _size,
-            child: Icon(icon,
-                size: _size * 0.5,
-                color: active ? tokens.activeColor : tokens.textSecondary),
+            child: Center(
+              child: assetIcon != null
+                  ? KotiIcon(assetIcon!, size: _size * 0.5, color: color)
+                  : Icon(icon, size: _size * 0.5, color: color),
+            ),
           ),
         ),
       ),
@@ -570,41 +637,62 @@ class _TransportRow extends StatelessWidget {
   }
 }
 
+/// Mute on the left, the slider itself (when the player reports a volume
+/// level), and a speaker-group icon on the right that opens the players
+/// popup — folding player-switching into this row rather than it sitting
+/// alone above the tab strip, which read as a lone, oddly-spaced control.
 class _VolumeRow extends StatelessWidget {
-  final double volume;
+  final double? volume;
+  final bool muted;
   final ValueChanged<double> onChanged;
   final ValueChanged<double> onChangeEnd;
+  final VoidCallback onToggleMute;
+  final VoidCallback onOpenPlayers;
 
-  const _VolumeRow({required this.volume, required this.onChanged, required this.onChangeEnd});
+  const _VolumeRow({
+    required this.volume,
+    required this.muted,
+    required this.onChanged,
+    required this.onChangeEnd,
+    required this.onToggleMute,
+    required this.onOpenPlayers,
+  });
 
   @override
   Widget build(BuildContext context) {
     final tokens = KotiTheme.of(context);
     return Row(
       children: [
-        Icon(Icons.volume_down, color: tokens.textSecondary, size: 20),
-        Expanded(
-          child: SliderTheme(
-            data: SliderThemeData(
-              activeTrackColor: tokens.activeColor,
-              inactiveTrackColor: tokens.iconCircleBackground,
-              thumbColor: tokens.activeColor,
-              overlayColor: tokens.activeColor.withValues(alpha: 0.2),
-            ),
-            child: Slider(
-              value: volume.clamp(0.0, 1.0),
-              onChanged: onChanged,
-              onChangeEnd: onChangeEnd,
-            ),
-          ),
+        _RoundIconButton(
+          icon: muted ? Icons.volume_off : Icons.volume_up,
+          tooltip: muted ? 'Unmute' : 'Mute',
+          active: muted,
+          onTap: onToggleMute,
         ),
-        SizedBox(
-          width: 36,
-          child: Text(
-            '${(volume.clamp(0.0, 1.0) * 100).round()}%',
-            textAlign: TextAlign.end,
-            style: TextStyle(color: tokens.textSecondary, fontSize: 12),
-          ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: volume == null
+              ? const SizedBox.shrink()
+              : SliderTheme(
+                  data: SliderThemeData(
+                    activeTrackColor: tokens.activeColor,
+                    inactiveTrackColor: tokens.iconCircleBackground,
+                    thumbColor: tokens.activeColor,
+                    overlayColor: tokens.activeColor.withValues(alpha: 0.2),
+                  ),
+                  child: Slider(
+                    value: volume!.clamp(0.0, 1.0),
+                    onChanged: onChanged,
+                    onChangeEnd: onChangeEnd,
+                  ),
+                ),
+        ),
+        const SizedBox(width: 10),
+        _RoundIconButton(
+          assetIcon: 'speaker-group',
+          tooltip: 'Players',
+          active: false,
+          onTap: onOpenPlayers,
         ),
       ],
     );

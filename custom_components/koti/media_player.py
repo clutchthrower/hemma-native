@@ -40,8 +40,15 @@ async def async_setup_entry(
 class KotiMediaPlayer(CoordinatorEntity[KotiCoordinator], MediaPlayerEntity):
     """A Koti tablet acting as a Music Assistant player."""
 
+    # Music Assistant's own "Fully Kiosk Browser" player (the recommended
+    # setup — see Settings -> Speaker in the app) names its player entity
+    # after this same device's reported name, with no entity-name suffix.
+    # Leaving this one unnamed too would make HA register both under the
+    # same entity_id base and disambiguate with an opaque "_2", which reads
+    # as an accidental duplicate rather than the two intentionally-separate
+    # entities they are.
     _attr_has_entity_name = True
-    _attr_name = None
+    _attr_name = "Direct Control"
     _attr_supported_features = SUPPORTED_FEATURES
     _attr_media_content_type = MediaType.MUSIC
 

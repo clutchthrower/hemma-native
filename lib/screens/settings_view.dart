@@ -15,8 +15,8 @@ import 'settings/advanced_settings_page.dart';
 import 'settings/appearance_settings_page.dart';
 import 'settings/connection_settings_page.dart';
 import 'settings/display_settings_page.dart';
+import 'settings/music_assistant_settings_page.dart';
 import 'settings/rooms_settings_page.dart';
-import 'settings/speaker_settings_page.dart';
 import 'update_screen.dart';
 
 /// Settings, restyled as a "room" rather than a sliding side menu: the same
@@ -148,13 +148,6 @@ class _SettingsViewState extends State<SettingsView> {
         onTap: () => _push(const AdvancedSettingsPage()),
       ),
       SettingsEntry(
-        icon: Icons.speaker_outlined,
-        label: 'Speaker',
-        stateText: settings.speakerEnabled ? 'Enabled' : 'Disabled',
-        active: settings.speakerEnabled,
-        onTap: () => _push(const SpeakerSettingsPage()),
-      ),
-      SettingsEntry(
         icon: Icons.system_update_alt,
         label: 'Auto Update Checks',
         stateText: settings.updateChecksEnabled ? 'On' : 'Off',
@@ -171,9 +164,11 @@ class _SettingsViewState extends State<SettingsView> {
       SettingsEntry(
         icon: Icons.library_music_outlined,
         label: 'Music Assistant',
-        stateText: settings.musicAssistantEnabled ? 'On' : 'Off',
+        stateText: settings.musicAssistantEnabled
+            ? (settings.speakerEnabled ? 'On + Speaker' : 'On')
+            : 'Off',
         active: settings.musicAssistantEnabled,
-        onTap: () => settings.setMusicAssistantEnabled(!settings.musicAssistantEnabled),
+        onTap: () => _push(const MusicAssistantSettingsPage()),
       ),
       if (_availableUpdate != null)
         SettingsEntry(

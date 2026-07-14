@@ -11,6 +11,8 @@ class MusicAssistantApi {
   MusicAssistantApi(this.store);
 
   String? _configEntryId;
+  List<Map<String, dynamic>>? _entityRegistryCache;
+  final Map<String, String?> _favoriteButtonCache = {};
 
   Future<String> _requireConfigEntryId() async {
     final cached = _configEntryId;
@@ -106,6 +108,51 @@ class MusicAssistantApi {
 
   Future<void> unjoin(String entityId) {
     return store.callService('media_player', 'unjoin', entityId: entityId);
+  }
+
+  /// Finds the `button.*` entity MA's HA integration auto-creates per
+  /// player specifically to favorite whatever that player is currently
+  /// playing (there's no `media_player`-domain service for this — HA's
+  /// music_assistant integration only exposes it as a per-device button
+  /// entity, confirmed against the actual integration source, not
+  /// guessed). Resolved once via the entity registry (which entity_id HA
+  /// slugifies it to isn't predictable from the player's own entity_id)
+  /// and cached — including a null result, so a player without one (e.g.
+  /// a non-admin account can't read the registry, or the button entity
+  /// was disabled) isn't re-queried every rebuild.
+  Future<String?> resolveFavoriteButton(String playerEntityId) async {
+    if (_favoriteButtonCache.containsKey(playerEntityId)) {
+      return _favoriteButtonCache[playerEntityId];
+    }
+    String? result;
+    try {
+      final registry = _entityRegistryCache ??= await store.getEntityRegistry();
+      final playerEntry = registry.firstWhere(
+        (e) => e['entity_id'] == playerEntityId,
+        orElse: () => const {},
+      );
+      final deviceId = playerEntry['device_id'] as String?;
+      if (deviceId != null) {
+        final buttonEntry = registry.firstWhere(
+          (e) =>
+              e['device_id'] == deviceId &&
+              (e['entity_id'] as String?)?.startsWith('button.') == true &&
+              e['platform'] == 'music_assistant' &&
+              (e['unique_id'] as String?)?.contains('favorite') == true,
+          orElse: () => const {},
+        );
+        result = buttonEntry['entity_id'] as String?;
+      }
+    } catch (_) {
+      // Registry access needs an admin account — leave result null so the
+      // heart button just doesn't show, rather than throwing into the UI.
+    }
+    _favoriteButtonCache[playerEntityId] = result;
+    return result;
+  }
+
+  Future<void> pressFavoriteButton(String buttonEntityId) {
+    return store.callService('button', 'press', entityId: buttonEntityId);
   }
 
   List<MusicItem> _parseResultBuckets(Map<String, dynamic> response) {

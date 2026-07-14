@@ -164,6 +164,21 @@ class StateStore extends ChangeNotifier {
     return ws.getConfigEntries(domain: domain);
   }
 
+  /// Test seam: return a canned entity registry instead of hitting the
+  /// network.
+  @visibleForTesting
+  List<Map<String, dynamic>>? debugEntityRegistry;
+
+  /// Admin API, WebSocket-only.
+  Future<List<Map<String, dynamic>>> getEntityRegistry() {
+    final debug = debugEntityRegistry;
+    if (debug != null) return Future.value(debug);
+    if (ws.status != HaConnectionStatus.connected) {
+      throw StateError('Not connected to Home Assistant');
+    }
+    return ws.getEntityRegistry();
+  }
+
   Future<void> forceRefresh() async {
     final list = await rest.states();
     for (final raw in list) {

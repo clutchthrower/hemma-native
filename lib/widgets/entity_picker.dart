@@ -15,6 +15,13 @@ class EntityPickerField extends StatelessWidget {
   final List<String>? domains;
   final List<String>? deviceClasses;
   final bool allowClear;
+  /// Hides `unavailable`/`unknown` entities — useful when picking "the one
+  /// live entity that represents this device" (e.g. a speaker's own player
+  /// entity), where a stale/orphaned duplicate would otherwise be an easy
+  /// mistake to pick. Leave false (the default) for pickers where an
+  /// entity being temporarily offline shouldn't hide it, e.g. wiring up a
+  /// room's sensor.
+  final bool excludeUnavailable;
 
   const EntityPickerField({
     super.key,
@@ -24,6 +31,7 @@ class EntityPickerField extends StatelessWidget {
     this.domains,
     this.deviceClasses,
     this.allowClear = true,
+    this.excludeUnavailable = false,
   });
 
   List<EntityState> _filtered(StateStore store) {
@@ -31,6 +39,9 @@ class EntityPickerField extends StatelessWidget {
       if (domains != null && !domains!.contains(e.domain)) return false;
       if (deviceClasses != null &&
           !deviceClasses!.contains(e.attr<String>('device_class', ''))) {
+        return false;
+      }
+      if (excludeUnavailable && (e.state == 'unavailable' || e.state == 'unknown')) {
         return false;
       }
       return true;
