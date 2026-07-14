@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../theme/koti_theme.dart';
 import '../../widgets/glass_tab_strip.dart';
 import 'music_assistant_api.dart';
-import 'music_item_tile.dart';
+import 'music_grid_tile.dart';
 
 const _mediaTypes = ['artist', 'album', 'playlist', 'radio', 'track'];
 const _mediaTypeLabels = {
@@ -107,9 +107,16 @@ class _MusicBrowseTabState extends State<MusicBrowseTab>
                     style: TextStyle(color: tokens.textSecondary),
                   ),
                 )
-              : ListView.builder(
+              : GridView.builder(
+                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 16),
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 160,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 0.8,
+                  ),
                   itemCount: items.length,
-                  itemBuilder: (context, i) => MusicItemTile(
+                  itemBuilder: (context, i) => MusicGridTile(
                     item: items[i],
                     onTap: () => widget.api.playItem(widget.entityId, items[i]),
                   ),
