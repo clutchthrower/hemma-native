@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../store/state_store.dart';
 import '../widgets/entity_watcher.dart';
 import 'base_entity_card.dart';
+import 'light_color_popup.dart';
 import 'light_group_popup.dart';
 
 /// Light tile with recursive group expansion for the on-count. Toggling is
@@ -62,6 +63,16 @@ class LightCard extends StatelessWidget {
         final stateText =
             unavailable ? 'Unavailable' : (active ? '$onCount On' : 'Off');
 
+        // RGB/RGBW/RGBWW bulbs report one of these color-family modes;
+        // tunable-white bulbs report 'color_temp'. A single light with
+        // either gets the color/kelvin popup instead of a plain toggle —
+        // groups keep their existing per-member toggle list, since HA
+        // doesn't guarantee a group's members share one current color.
+        final colorModes =
+            (root?.attributes['supported_color_modes'] as List?)?.cast<String>() ?? const [];
+        final supportsColorControl = colorModes
+            .any((m) => ['rgb', 'rgbw', 'rgbww', 'hs', 'xy', 'color_temp'].contains(m));
+
         void toggle() {
           store.callService('light', active ? 'turn_off' : 'turn_on',
               entityId: entityId, data: const {'transition': 1});
@@ -73,14 +84,17 @@ class LightCard extends StatelessWidget {
           stateText: stateText,
           active: active,
           position: position,
-          // Single light: tap toggles. Group: tap opens the members popup
-          // (the trailing switch still toggles the whole group). Long-press
-          // is reserved for entering edit mode.
+          // Group: tap opens the per-member toggle list. Single color/CCT
+          // light: tap opens the color/kelvin popup. Plain on-off light:
+          // tap toggles. The trailing switch always toggles in place
+          // regardless. Long-press is reserved for entering edit mode.
           onTap: unavailable
               ? null
               : (members.length > 1
                   ? () => showLightGroupPopup(context, entityId, members)
-                  : toggle),
+                  : (supportsColorControl
+                      ? () => showLightColorPopup(context, entityId)
+                      : toggle)),
           // Top-right switch like the original's toggleable cards.
           trailing: Transform.scale(
             scale: 0.8,
