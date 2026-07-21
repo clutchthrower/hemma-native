@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../speaker/koti_player_server.dart';
 import '../../store/settings_store.dart';
 import '../../widgets/entity_picker.dart';
+import '../../widgets/koti_switch.dart';
 
 /// Combines the "Music Assistant" page toggle with the "tablet as a
 /// speaker" setup that only matters once it's on — one settings
@@ -63,7 +64,7 @@ class _MusicAssistantSettingsPageState extends State<MusicAssistantSettingsPage>
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          SwitchListTile(
+          KotiSwitchListTile(
             title: const Text('Music Assistant'),
             subtitle: const Text(
                 'Adds a swipeable Music page (left of Home): player/group '
@@ -73,7 +74,7 @@ class _MusicAssistantSettingsPageState extends State<MusicAssistantSettingsPage>
           ),
           if (settings.musicAssistantEnabled) ...[
             const Divider(height: 32),
-            SwitchListTile(
+            KotiSwitchListTile(
               title: const Text('Use this tablet as a speaker'),
               subtitle: Text('Runs a local server on "${settings.deviceName}" that '
                   'Music Assistant\'s built-in "Fully Kiosk Browser" player '

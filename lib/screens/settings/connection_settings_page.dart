@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import '../../store/settings_store.dart';
 
+/// Identity/credentials only — reconnect interval, request timeout, and
+/// Test Connection live under Diagnostics instead (they're live network
+/// tuning tools you'd reach for while troubleshooting, not something you
+/// set once and forget like a URL or token, so lumping them in here made
+/// this page's save model inconsistent: URL/token/mode staged and only
+/// committed on Save, while those tuning fields wrote immediately per
+/// drag — splitting them out fixes that).
 class ConnectionSettingsPage extends StatefulWidget {
   const ConnectionSettingsPage({super.key});
 
@@ -16,8 +22,6 @@ class _ConnectionSettingsPageState extends State<ConnectionSettingsPage> {
   late final TextEditingController _remoteUrlController;
   late final TextEditingController _tokenController;
   ConnectionMode _mode = ConnectionMode.localOnly;
-  String? _testResult;
-  bool _testing = false;
 
   @override
   void initState() {
@@ -37,34 +41,6 @@ class _ConnectionSettingsPageState extends State<ConnectionSettingsPage> {
     super.dispose();
   }
 
-  Future<void> _testConnection() async {
-    setState(() {
-      _testing = true;
-      _testResult = null;
-    });
-    final url = _localUrlController.text.trim();
-    final token = _tokenController.text.trim();
-    final stopwatch = Stopwatch()..start();
-    try {
-      final response = await http
-          .get(Uri.parse('$url/api/'), headers: {'Authorization': 'Bearer $token'})
-          .timeout(const Duration(seconds: 10));
-      stopwatch.stop();
-      if (response.statusCode == 200) {
-        setState(() => _testResult =
-            'Connected · ${stopwatch.elapsedMilliseconds}ms');
-      } else if (response.statusCode == 401) {
-        setState(() => _testResult = 'Unauthorized — check your access token');
-      } else {
-        setState(() => _testResult = 'HTTP ${response.statusCode}');
-      }
-    } catch (e) {
-      setState(() => _testResult = 'Failed: $e');
-    } finally {
-      setState(() => _testing = false);
-    }
-  }
-
   Future<void> _save() async {
     final settings = Provider.of<SettingsStore>(context, listen: false);
     await settings.setConnection(
@@ -82,7 +58,6 @@ class _ConnectionSettingsPageState extends State<ConnectionSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final settings = context.watch<SettingsStore>();
     return Scaffold(
       appBar: AppBar(title: const Text('Connection')),
       body: ListView(
@@ -126,40 +101,6 @@ class _ConnectionSettingsPageState extends State<ConnectionSettingsPage> {
             ],
             selected: {_mode},
             onSelectionChanged: (s) => setState(() => _mode = s.first),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: _testing ? null : _testConnection,
-                  child: Text(_testing ? 'Testing…' : 'Test Connection'),
-                ),
-              ),
-            ],
-          ),
-          if (_testResult != null) ...[
-            const SizedBox(height: 8),
-            Text(_testResult!),
-          ],
-          const SizedBox(height: 16),
-          Text('Reconnect interval: ${settings.reconnectSeconds}s'),
-          Slider(
-            value: settings.reconnectSeconds.toDouble(),
-            min: 1,
-            max: 30,
-            divisions: 29,
-            label: '${settings.reconnectSeconds}s',
-            onChanged: (v) => settings.setReconnectSeconds(v.round()),
-          ),
-          Text('Request timeout: ${settings.timeoutSeconds}s'),
-          Slider(
-            value: settings.timeoutSeconds.toDouble(),
-            min: 5,
-            max: 60,
-            divisions: 11,
-            label: '${settings.timeoutSeconds}s',
-            onChanged: (v) => settings.setTimeoutSeconds(v.round()),
           ),
           const SizedBox(height: 16),
           FilledButton(onPressed: _save, child: const Text('Save')),

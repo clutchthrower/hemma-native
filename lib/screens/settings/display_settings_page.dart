@@ -5,9 +5,14 @@ import 'package:screen_brightness/screen_brightness.dart';
 
 import '../../theme/koti_theme.dart';
 import '../../theme/tokens.dart';
+import '../../widgets/koti_switch.dart';
 
-/// Physical-screen settings for an always-mounted tablet: brightness,
-/// light/dark mode, and an idle screensaver timeout.
+/// Physical-screen settings for an always-mounted tablet: appearance
+/// (color mode, brightness, transparency/animation/motion tuning) and
+/// screensaver/power behavior. Absorbs what used to be a separate
+/// "Appearance & Theme" page — that page and this one both had their own
+/// copy of the color-mode picker, which was a real duplicate control, not
+/// two different settings.
 class DisplaySettingsPage extends StatefulWidget {
   const DisplaySettingsPage({super.key});
 
@@ -53,7 +58,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('Color Mode', style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text('Appearance', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           SegmentedButton<ColorModePref>(
             segments: const [
@@ -64,8 +69,8 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
             selected: {theme.colorMode},
             onSelectionChanged: (s) => theme.setColorMode(s.first),
           ),
-          const SizedBox(height: 24),
-          const Text('Brightness', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          const Text('Brightness'),
           if (_brightnessError != null)
             Padding(
               padding: const EdgeInsets.only(top: 4),
@@ -84,7 +89,39 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
                 const Icon(Icons.brightness_high),
               ],
             ),
-          const SizedBox(height: 24),
+          Text('Card Transparency: ${(theme.cardTransparency * 100).round()}%'),
+          Slider(
+            value: theme.cardTransparency,
+            onChanged: theme.setCardTransparency,
+          ),
+          Text('Animation Speed: ${theme.animationSpeed.toStringAsFixed(1)}x'),
+          Slider(
+            value: theme.animationSpeed,
+            min: 0.5,
+            max: 2.0,
+            divisions: 6,
+            onChanged: theme.setAnimationSpeed,
+          ),
+          KotiSwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Animations'),
+            value: theme.entranceAnimationsEnabled,
+            onChanged: theme.setEntranceAnimationsEnabled,
+          ),
+          KotiSwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Smart Sorting'),
+            value: theme.smartRowSortingEnabled,
+            onChanged: theme.setSmartRowSortingEnabled,
+          ),
+          KotiSwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Background Effect'),
+            subtitle: const Text('Parallax on room background photos'),
+            value: theme.parallaxEnabled,
+            onChanged: theme.setParallaxEnabled,
+          ),
+          const Divider(height: 32),
           const Text('Screensaver', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           Text(
@@ -104,13 +141,13 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
                 .toList(),
             onChanged: (v) => theme.setScreensaverTimeoutMinutes(v ?? 0),
           ),
-          SwitchListTile(
+          KotiSwitchListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text('Show clock'),
             value: theme.screensaverShowClock,
             onChanged: theme.setScreensaverShowClock,
           ),
-          SwitchListTile(
+          KotiSwitchListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text('Show weather'),
             value: theme.screensaverShowWeather,
@@ -133,7 +170,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
             ),
           ),
           const Divider(height: 32),
-          SwitchListTile(
+          KotiSwitchListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text('Fullscreen'),
             subtitle: const Text(
@@ -141,7 +178,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
             value: theme.fullscreenEnabled,
             onChanged: theme.setFullscreenEnabled,
           ),
-          SwitchListTile(
+          KotiSwitchListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text('Keep screen awake'),
             subtitle: const Text(

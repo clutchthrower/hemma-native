@@ -1,8 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 enum HaConnectionStatus { disconnected, connecting, connected, reconnecting }
+
+/// One captured WebSocket frame, for the Diagnostics page's debug log.
+class WsDebugFrame {
+  final bool outgoing;
+  final String raw;
+  final DateTime timestamp;
+  WsDebugFrame(this.outgoing, this.raw, this.timestamp);
+}
 
 /// Persistent WebSocket connection to Home Assistant's `/api/websocket`
 /// endpoint. Implements the standard auth handshake, silent auto-reconnect
@@ -36,6 +45,22 @@ class HaWebSocketClient {
 
   final _eventController = StreamController<Map<String, dynamic>>.broadcast();
   Stream<Map<String, dynamic>> get events => _eventController.stream;
+
+  /// Diagnostics page toggle — off by default so this never captures
+  /// traffic (or holds it in memory) unless someone's actually debugging.
+  bool debugLoggingEnabled = false;
+  static const _debugLogCap = 200;
+  final ValueNotifier<List<WsDebugFrame>> debugLog = ValueNotifier(const []);
+
+  void _captureDebugFrame(bool outgoing, String raw) {
+    if (!debugLoggingEnabled) return;
+    final next = List<WsDebugFrame>.from(debugLog.value)
+      ..add(WsDebugFrame(outgoing, raw, DateTime.now()));
+    if (next.length > _debugLogCap) next.removeAt(0);
+    debugLog.value = next;
+  }
+
+  void clearDebugLog() => debugLog.value = const [];
 
   final Map<int, Completer<Map<String, dynamic>>> _pending = {};
   final List<Map<String, dynamic>> _outgoingQueue = [];
@@ -72,7 +97,8 @@ class HaWebSocketClient {
   }
 
   void _onMessage(dynamic raw) {
-    final msg = jsonDecode(raw as String) as Map<String, dynamic>;
+    _captureDebugFrame(false, raw as String);
+    final msg = jsonDecode(raw) as Map<String, dynamic>;
     switch (msg['type']) {
       case 'auth_required':
         _send({'type': 'auth', 'access_token': token});
@@ -125,7 +151,9 @@ class HaWebSocketClient {
   }
 
   void _send(Map<String, dynamic> payload) {
-    _channel?.sink.add(jsonEncode(payload));
+    final raw = jsonEncode(payload);
+    _captureDebugFrame(true, raw);
+    _channel?.sink.add(raw);
   }
 
   int _nextId() => _messageId++;
@@ -249,6 +277,7 @@ class HaWebSocketClient {
     close();
     _statusController.close();
     _eventController.close();
+    debugLog.dispose();
   }
 }
 

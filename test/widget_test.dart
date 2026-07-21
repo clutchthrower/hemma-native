@@ -21,6 +21,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Local URL'), findsOneWidget);
-    expect(find.text('Test Connection'), findsOneWidget);
+    expect(find.text('Remote URL (optional)'), findsOneWidget);
+    expect(find.text('Long-Lived Access Token'), findsOneWidget);
   });
 }

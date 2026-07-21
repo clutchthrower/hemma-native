@@ -17,6 +17,7 @@ import 'screens/koti_splash_screen.dart';
 import 'speaker/koti_player_server.dart';
 import 'screens/update_screen.dart';
 import 'store/helper_store.dart';
+import 'store/local_stats_store.dart';
 import 'store/settings_store.dart';
 import 'store/state_store.dart';
 import 'theme/koti_theme.dart';
@@ -58,6 +59,7 @@ class _KotiAppState extends State<KotiApp> with WidgetsBindingObserver {
   StateStore? _stateStore;
   HelperStore? _helperStore;
   final ThemeController _themeController = ThemeController();
+  final LocalStatsStore _localStats = LocalStatsStore();
   bool _ready = false;
   bool _splashDone = false;
   String? _connectedUrl;
@@ -159,6 +161,7 @@ class _KotiAppState extends State<KotiApp> with WidgetsBindingObserver {
 
   Future<void> _init() async {
     await _themeController.load();
+    unawaited(_localStats.load());
     await _connect();
     setState(() => _ready = true);
     // Update check: on launch, then every 6 hours. Never blocks startup —
@@ -265,6 +268,7 @@ class _KotiAppState extends State<KotiApp> with WidgetsBindingObserver {
       providers: [
         ChangeNotifierProvider.value(value: widget.settings),
         ChangeNotifierProvider.value(value: _themeController),
+        ChangeNotifierProvider.value(value: _localStats),
         if (_stateStore != null) ChangeNotifierProvider.value(value: _stateStore!),
         if (_helperStore != null) ChangeNotifierProvider.value(value: _helperStore!),
       ],
