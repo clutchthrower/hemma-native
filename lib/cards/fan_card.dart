@@ -5,6 +5,7 @@ import '../popups/popup_base.dart';
 import '../store/state_store.dart';
 import '../theme/koti_theme.dart';
 import '../widgets/entity_watcher.dart';
+import '../widgets/koti_switch.dart';
 import 'base_entity_card.dart';
 
 class FanCard extends StatelessWidget {
@@ -40,18 +41,13 @@ class FanCard extends StatelessWidget {
             title: name,
             builder: (context) => _FanControls(entityId: entityId),
           ),
-          trailing: Transform.scale(
-            scale: 0.8,
-            alignment: Alignment.topRight,
-            child: Switch(
-              value: active,
-              onChanged: (_) =>
-                  store.callService('fan', 'toggle', entityId: entityId),
-              activeThumbColor: Colors.white,
-              activeTrackColor: const Color.fromRGBO(255, 255, 255, 0.45),
-              inactiveThumbColor: Colors.white70,
-              inactiveTrackColor: const Color.fromRGBO(255, 255, 255, 0.18),
-            ),
+          trailing: KotiSwitch(
+            value: active,
+            onChanged: (_) =>
+                store.callService('fan', 'toggle', entityId: entityId),
+            size: 28,
+            activeColor: Colors.white,
+            inactiveColor: Colors.white70,
           ),
         );
       },
@@ -86,7 +82,7 @@ class _FanControlsState extends State<_FanControls> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SwitchListTile(
+            KotiSwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(active ? 'On' : 'Off',
                   style: TextStyle(color: tokens.textPrimary)),

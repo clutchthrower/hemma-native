@@ -5,6 +5,7 @@ import '../popups/popup_base.dart';
 import '../store/state_store.dart';
 import '../theme/koti_theme.dart';
 import '../widgets/entity_watcher.dart';
+import '../widgets/koti_switch.dart';
 
 /// Warm-to-cool reference colors for the Kelvin bar's gradient — an
 /// approximation for visual orientation (this app doesn't render blackbody
@@ -184,7 +185,12 @@ class _NameRow extends StatelessWidget {
               style:
                   TextStyle(color: tokens.textPrimary, fontWeight: FontWeight.w700, fontSize: 16)),
         ),
-        Switch(value: on, onChanged: onToggle),
+        KotiSwitch(
+          value: on,
+          onChanged: onToggle,
+          activeColor: tokens.activeColor,
+          inactiveColor: tokens.textSecondary,
+        ),
       ],
     );
   }

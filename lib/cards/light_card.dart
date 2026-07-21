@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../store/state_store.dart';
 import '../widgets/entity_watcher.dart';
+import '../widgets/koti_switch.dart';
 import 'base_entity_card.dart';
 import 'light_color_popup.dart';
 import 'light_group_popup.dart';
@@ -96,17 +97,12 @@ class LightCard extends StatelessWidget {
                       ? () => showLightColorPopup(context, entityId)
                       : toggle)),
           // Top-right switch like the original's toggleable cards.
-          trailing: Transform.scale(
-            scale: 0.8,
-            alignment: Alignment.topRight,
-            child: Switch(
-              value: active,
-              onChanged: unavailable ? null : (_) => toggle(),
-              activeThumbColor: Colors.white,
-              activeTrackColor: const Color.fromRGBO(255, 255, 255, 0.45),
-              inactiveThumbColor: Colors.white70,
-              inactiveTrackColor: const Color.fromRGBO(255, 255, 255, 0.18),
-            ),
+          trailing: KotiSwitch(
+            value: active,
+            onChanged: unavailable ? null : (_) => toggle(),
+            size: 28,
+            activeColor: Colors.white,
+            inactiveColor: Colors.white70,
           ),
         );
       },

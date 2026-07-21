@@ -5,6 +5,7 @@ import '../store/state_store.dart';
 import '../theme/koti_theme.dart';
 import '../widgets/entity_watcher.dart';
 import '../widgets/koti_icon.dart';
+import '../widgets/koti_switch.dart';
 import '../popups/popup_base.dart';
 import 'light_color_popup.dart';
 
@@ -53,7 +54,7 @@ void showLightGroupPopup(BuildContext context, String groupId, List<String> memb
                   diameter: 38,
                 ),
                 title: Text(name, style: TextStyle(color: tokens.textPrimary)),
-                trailing: Switch(
+                trailing: KotiSwitch(
                   value: isOn,
                   onChanged: (v) => store.callService(
                     'light',
@@ -61,6 +62,8 @@ void showLightGroupPopup(BuildContext context, String groupId, List<String> memb
                     entityId: id,
                     data: const {'transition': 2},
                   ),
+                  activeColor: tokens.activeColor,
+                  inactiveColor: tokens.textSecondary,
                 ),
               );
             }),

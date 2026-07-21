@@ -9,6 +9,7 @@ import '../theme/koti_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/entity_watcher.dart';
 import '../widgets/koti_icon.dart';
+import '../widgets/koti_switch.dart';
 import 'card_spec.dart';
 import 'template_engine.dart';
 
@@ -563,7 +564,7 @@ class _ToggleBlock extends StatelessWidget {
         entity?.attr<String>('friendly_name', entityId ?? '') ??
         entityId ??
         '';
-    return SwitchListTile(
+    return KotiSwitchListTile(
       contentPadding: EdgeInsets.zero,
       dense: true,
       title: Text(renderTemplate(label, scope),
