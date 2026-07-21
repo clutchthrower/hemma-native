@@ -22,6 +22,60 @@ List<String> availablePlayerIds(StateStore store) {
   return ids;
 }
 
+/// Music Assistant mirrors every player it manages into HA as its own
+/// `media_player` entity — including ones that are ALSO natively
+/// integrated (a Cast/webOS/etc. entity from a completely separate HA
+/// integration), which is what causes the real "double speaker" duplicates
+/// (confirmed live against the user's HA, not guessed): e.g.
+/// `media_player.bedroom_speaker` (platform `cast`) and
+/// `media_player.bedroom_speaker_2` (platform `music_assistant`) are two
+/// distinct HA entities for the same physical speaker. The registry proved
+/// a reliable link between them: MA reuses the underlying protocol's own
+/// device identifier as its mirrored entity's `unique_id`, so both
+/// entities share the exact same `unique_id` string even though they're
+/// unrelated HA registrations. Grouping by `unique_id` and keeping only
+/// the `music_assistant`-platform entity (the one MA's own services are
+/// guaranteed to work with) resolves the duplicate cleanly.
+///
+/// This does NOT catch every duplicate a user might see — e.g. a
+/// physical TV controllable via both HA's native "LG webOS TV"
+/// integration and Google Cast has two independent identifier systems
+/// with no shared value in HA's registry at all, so there's nothing here
+/// to match on. Music Assistant itself doesn't treat that TV's webOS
+/// entity as a player either (it's not Music-Assistant-controllable), so
+/// that kind of duplicate needs resolving directly in HA (Settings →
+/// Devices & services → Entities → disable the one you don't want to see).
+Future<List<String>> _dedupedPlayerIds(StateStore store, List<String> candidateIds) async {
+  List<Map<String, dynamic>> registry;
+  try {
+    registry = await store.getEntityRegistry();
+  } catch (_) {
+    // Needs an admin account — fall back to the unfiltered list rather
+    // than throwing into the UI.
+    return candidateIds;
+  }
+  final byId = {
+    for (final e in registry)
+      if (e['entity_id'] is String) e['entity_id'] as String: e,
+  };
+  final byUniqueId = <String, List<String>>{};
+  for (final id in candidateIds) {
+    final uniqueId = byId[id]?['unique_id'] as String?;
+    if (uniqueId == null) continue;
+    byUniqueId.putIfAbsent(uniqueId, () => []).add(id);
+  }
+  final hide = <String>{};
+  for (final group in byUniqueId.values) {
+    if (group.length < 2) continue;
+    final maPlayer = group.firstWhere(
+      (id) => byId[id]?['platform'] == 'music_assistant',
+      orElse: () => group.first,
+    );
+    hide.addAll(group.where((id) => id != maPlayer));
+  }
+  return candidateIds.where((id) => !hide.contains(id)).toList();
+}
+
 /// Shows every player as a card (name, what's playing, its own live volume
 /// slider) in a popup — modeled on HOMEii Flow's "Players" grid. The sole
 /// entry point for picking/switching a player: called from wherever a
@@ -36,32 +90,60 @@ void showMusicPlayersPopup(
   showKotiPopup(
     context,
     title: 'Players',
-    builder: (context) {
-      final ids = availablePlayerIds(store);
-      if (ids.isEmpty) {
-        final tokens = KotiTheme.of(context);
-        return Text('No media players found',
-            style: TextStyle(color: tokens.textSecondary));
-      }
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final id in ids)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: _PlayerCard(
-                entityId: id,
-                selected: id == selected,
-                onTap: () {
-                  onSelect(id);
-                  Navigator.of(context).pop();
-                },
-              ),
-            ),
-        ],
-      );
-    },
+    builder: (context) => _PlayersList(store: store, selected: selected, onSelect: onSelect),
   );
+}
+
+class _PlayersList extends StatefulWidget {
+  final StateStore store;
+  final String? selected;
+  final ValueChanged<String> onSelect;
+
+  const _PlayersList({required this.store, required this.selected, required this.onSelect});
+
+  @override
+  State<_PlayersList> createState() => _PlayersListState();
+}
+
+class _PlayersListState extends State<_PlayersList> {
+  // Registry-based dedup only needs computing once per popup open — the
+  // registry itself doesn't change while this is on screen, and
+  // recomputing on every entity-state tick would just redo the same work.
+  late final Future<List<String>> _dedupedIds =
+      _dedupedPlayerIds(widget.store, availablePlayerIds(widget.store));
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = KotiTheme.of(context);
+    return FutureBuilder<List<String>>(
+      future: _dedupedIds,
+      initialData: availablePlayerIds(widget.store),
+      builder: (context, snapshot) {
+        final ids = snapshot.data ?? const [];
+        if (ids.isEmpty) {
+          return Text('No media players found',
+              style: TextStyle(color: tokens.textSecondary));
+        }
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final id in ids)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _PlayerCard(
+                  entityId: id,
+                  selected: id == widget.selected,
+                  onTap: () {
+                    widget.onSelect(id);
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 class _PlayerCard extends StatefulWidget {
