@@ -111,6 +111,30 @@ class ThemeController extends ChangeNotifier {
         .catchError((_) => null);
   }
 
+  /// Resets in-memory state to the same defaults [load] would read on a
+  /// fresh install — doesn't touch SharedPreferences itself, since
+  /// `SettingsStore.resetToDefaults()` already clears the whole prefs
+  /// store (this controller shares it) before calling this. Without this,
+  /// the *running* session kept showing stale theme values after a Factory
+  /// Reset until the next cold launch, even though storage was wiped.
+  void resetToDefaults() {
+    colorMode = ColorModePref.system;
+    cardTransparency = 1.0;
+    animationSpeed = 1.0;
+    entranceAnimationsEnabled = true;
+    smartRowSortingEnabled = true;
+    parallaxEnabled = true;
+    screensaverTimeoutMinutes = 0;
+    fullscreenEnabled = true;
+    keepScreenOnEnabled = true;
+    screensaverShowClock = true;
+    screensaverShowWeather = true;
+    screensaverMotion = ScreensaverMotion.hop;
+    _applyKeepScreenOn();
+    _applyFullscreen();
+    notifyListeners();
+  }
+
   void setKeepScreenOnEnabled(bool v) {
     keepScreenOnEnabled = v;
     _applyKeepScreenOn();
