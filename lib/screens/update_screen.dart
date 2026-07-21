@@ -1,11 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 
 import '../api/app_update.dart';
+import '../theme/tokens.dart';
 import 'koti_splash_screen.dart';
 
 /// Blocking "Please Update" screen shown when a newer release exists.
@@ -38,31 +34,12 @@ class _UpdateScreenState extends State<UpdateScreen> {
       _error = null;
     });
     try {
-      final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/koti-update.apk');
-
-      final request = http.Request('GET', Uri.parse(widget.info.apkUrl));
-      final response = await http.Client().send(request);
-      if (response.statusCode != 200) {
-        throw Exception('download failed (HTTP ${response.statusCode})');
-      }
-      final total = response.contentLength ?? 0;
-      var received = 0;
-      final sink = file.openWrite();
-      await response.stream.listen((chunk) {
-        received += chunk.length;
-        sink.add(chunk);
-        if (total > 0 && mounted) {
-          setState(() => _progress = received / total);
-        }
-      }).asFuture<void>();
-      await sink.close();
-
-      // Hand the APK to Android's installer (FileProvider on the native
-      // side). The system takes over from here.
-      await const MethodChannel('koti/native')
-          .invokeMethod('installApk', {'path': file.path});
-      if (mounted) setState(() => _progress = null);
+      await downloadAndInstallApk(
+        widget.info.apkUrl,
+        onProgress: (p) {
+          if (mounted) setState(() => _progress = p);
+        },
+      );
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -90,7 +67,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
                 children: [
                   const Spacer(),
                   const Icon(Icons.system_update_alt,
-                      size: 56, color: Color(0xFF6EBAFF)),
+                      size: 56, color: KotiTokens.defaultAccent),
                   const SizedBox(height: 20),
                   const Text(
                     'Update Available',
@@ -105,7 +82,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
                   Text(
                     'Koti ${widget.currentVersion} → ${widget.info.version}',
                     style: const TextStyle(
-                        color: Color.fromRGBO(255, 255, 255, 0.75), fontSize: 15),
+                        color: KotiTokens.secondaryOnDark, fontSize: 15),
                   ),
                   if (widget.info.notes.isNotEmpty) ...[
                     const SizedBox(height: 16),
@@ -131,11 +108,11 @@ class _UpdateScreenState extends State<UpdateScreen> {
                     LinearProgressIndicator(
                         value: _progress == 0 ? null : _progress,
                         backgroundColor: const Color.fromRGBO(255, 255, 255, 0.2),
-                        color: const Color(0xFF6EBAFF)),
+                        color: KotiTokens.defaultAccent),
                     const SizedBox(height: 12),
                     Text(
                       'Downloading… ${((_progress ?? 0) * 100).toStringAsFixed(0)}%',
-                      style: const TextStyle(color: Color.fromRGBO(255, 255, 255, 0.75)),
+                      style: const TextStyle(color: KotiTokens.secondaryOnDark),
                     ),
                   ] else
                     FilledButton.icon(

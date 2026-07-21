@@ -14,15 +14,18 @@ class UpdatesCard extends StatefulWidget {
 }
 
 class _UpdatesCardState extends State<UpdatesCard> {
+  late final StateStore _store;
+
   @override
   void initState() {
     super.initState();
-    Provider.of<StateStore>(context, listen: false).addListener(_onChange);
+    _store = Provider.of<StateStore>(context, listen: false);
+    _store.addListener(_onChange);
   }
 
   @override
   void dispose() {
-    Provider.of<StateStore>(context, listen: false).removeListener(_onChange);
+    _store.removeListener(_onChange);
     super.dispose();
   }
 
@@ -30,7 +33,7 @@ class _UpdatesCardState extends State<UpdatesCard> {
 
   @override
   Widget build(BuildContext context) {
-    final store = Provider.of<StateStore>(context, listen: false);
+    final store = _store;
     final count =
         store.all.values.where((e) => e.domain == 'update' && e.state == 'on').length;
 

@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
 
 /// GitHub repository ("owner/name") whose Releases feed drives the in-app
 /// update flow. Leave empty to disable update checks entirely (e.g. while
@@ -86,4 +89,39 @@ class AppUpdateChecker {
       return null;
     }
   }
+}
+
+/// Downloads [apkUrl] to a temp file and hands it to Android's package
+/// installer (a `FileProvider` on the native side). [onProgress] is called
+/// with 0..1 while the download runs, then `null` once the installer intent
+/// has been launched — that's a hand-off, not confirmation the install
+/// itself finished, matching how Android's own installer UI takes over
+/// from here. Throws on failure (bad status code, stream error); callers
+/// are expected to show their own error state.
+Future<void> downloadAndInstallApk(
+  String apkUrl, {
+  required void Function(double? progress) onProgress,
+}) async {
+  onProgress(0);
+  final dir = await getTemporaryDirectory();
+  final file = File('${dir.path}/koti-update.apk');
+
+  final request = http.Request('GET', Uri.parse(apkUrl));
+  final response = await http.Client().send(request);
+  if (response.statusCode != 200) {
+    throw Exception('download failed (HTTP ${response.statusCode})');
+  }
+  final total = response.contentLength ?? 0;
+  var received = 0;
+  final sink = file.openWrite();
+  await response.stream.listen((chunk) {
+    received += chunk.length;
+    sink.add(chunk);
+    if (total > 0) onProgress(received / total);
+  }).asFuture<void>();
+  await sink.close();
+
+  await const MethodChannel('koti/native')
+      .invokeMethod('installApk', {'path': file.path});
+  onProgress(null);
 }

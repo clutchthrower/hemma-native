@@ -17,15 +17,18 @@ class BatteryCard extends StatefulWidget {
 }
 
 class _BatteryCardState extends State<BatteryCard> {
+  late final StateStore _store;
+
   @override
   void initState() {
     super.initState();
-    Provider.of<StateStore>(context, listen: false).addListener(_onChange);
+    _store = Provider.of<StateStore>(context, listen: false);
+    _store.addListener(_onChange);
   }
 
   @override
   void dispose() {
-    Provider.of<StateStore>(context, listen: false).removeListener(_onChange);
+    _store.removeListener(_onChange);
     super.dispose();
   }
 
@@ -33,7 +36,7 @@ class _BatteryCardState extends State<BatteryCard> {
 
   @override
   Widget build(BuildContext context) {
-    final store = Provider.of<StateStore>(context, listen: false);
+    final store = _store;
     final batteries = store.all.values.where((e) =>
         e.attr<String>('device_class', '') == 'battery' &&
         (widget.entityFilter == null || widget.entityFilter!.contains(e.entityId)));

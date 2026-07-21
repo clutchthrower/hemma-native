@@ -83,25 +83,13 @@ class _HeroRoomCardState extends State<HeroRoomCard>
   double _nameFontSize(Size size) => _clamp(48, size.width * 0.06 + 12, 100);
 
   Future<void> _rename() async {
-    final controller = TextEditingController(text: widget.room.name);
     final name = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Room Name'),
-        content: TextField(controller: controller, autofocus: true),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          FilledButton(
-              onPressed: () => Navigator.pop(context, controller.text),
-              child: const Text('Save')),
-        ],
-      ),
+      builder: (context) => _RenameRoomDialog(initialName: widget.room.name),
     );
     if (name != null && name.trim().isNotEmpty) {
       widget.onRoomChanged?.call(widget.room.copyWith(name: name.trim()));
     }
-    controller.dispose();
   }
 
   Future<void> _editBadge(BadgeKind kind) async {
@@ -271,6 +259,7 @@ class _HeroRoomCardState extends State<HeroRoomCard>
                   : Image.asset(
                       bg,
                       fit: BoxFit.cover,
+                      filterQuality: FilterQuality.high,
                       errorBuilder: (_, __, ___) => Container(color: Colors.black),
                     );
             },
@@ -290,14 +279,18 @@ class _HeroRoomCardState extends State<HeroRoomCard>
               // top-right on the same line, like the mobile original. The
               // clock lives in the app shell's top-right corner, not here.
               if (!portrait && settings.weatherEntityId != null)
-                WeatherWidget(
-                  weatherEntityId: settings.weatherEntityId!,
-                  iconSize: 26,
-                  style: const TextStyle(
-                    fontFamily: 'Hanken Grotesk',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 24,
-                    color: Colors.white,
+                GestureDetector(
+                  onLongPress: canEdit && !editing ? edit.enter : null,
+                  onTap: editing ? () => showWeatherEntityPicker(context) : null,
+                  child: WeatherWidget(
+                    weatherEntityId: settings.weatherEntityId!,
+                    iconSize: 26,
+                    style: const TextStyle(
+                      fontFamily: 'Hanken Grotesk',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 24,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               Row(
@@ -336,14 +329,18 @@ class _HeroRoomCardState extends State<HeroRoomCard>
                   if (portrait && settings.weatherEntityId != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 12),
-                      child: WeatherWidget(
-                        weatherEntityId: settings.weatherEntityId!,
-                        iconSize: 24,
-                        style: const TextStyle(
-                          fontFamily: 'Hanken Grotesk',
-                          fontWeight: FontWeight.w600,
-                          fontSize: 18,
-                          color: Colors.white,
+                      child: GestureDetector(
+                        onLongPress: canEdit && !editing ? edit.enter : null,
+                        onTap: editing ? () => showWeatherEntityPicker(context) : null,
+                        child: WeatherWidget(
+                          weatherEntityId: settings.weatherEntityId!,
+                          iconSize: 24,
+                          style: const TextStyle(
+                            fontFamily: 'Hanken Grotesk',
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -376,6 +373,47 @@ class _HeroRoomCardState extends State<HeroRoomCard>
             ],
           ),
         ),
+      ],
+    );
+  }
+}
+
+/// Owning the controller here (not in `_rename` above, disposed right after
+/// the dialog's Future resolves) matters: the dialog is still mid-close
+/// animation, not yet unmounted, when that Future completes, so an
+/// immediate `controller.dispose()` there rips it out from under a
+/// still-live `TextField` and corrupts the element tree — the real cause
+/// behind a `_dependents.isEmpty`/`defunct` assertion crash reproduced live
+/// on the equivalent Device Name rename dialog.
+class _RenameRoomDialog extends StatefulWidget {
+  final String initialName;
+  const _RenameRoomDialog({required this.initialName});
+
+  @override
+  State<_RenameRoomDialog> createState() => _RenameRoomDialogState();
+}
+
+class _RenameRoomDialogState extends State<_RenameRoomDialog> {
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.initialName);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Room Name'),
+      content: TextField(controller: _controller, autofocus: true),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+        FilledButton(
+            onPressed: () => Navigator.pop(context, _controller.text),
+            child: const Text('Save')),
       ],
     );
   }
