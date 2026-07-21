@@ -8,8 +8,8 @@ import 'dart:convert';
 /// paste it, and the importer just picks their own device in the card
 /// editor (the picked entity overrides the spec's `entity`).
 class CustomCardSpec {
-  /// Icon names bundled in assets/icons/ — anything else falls back to
-  /// [fallbackIcon] at render time (icons never load over the network).
+  /// Icon names mapped in `koti_icon_glyphs.dart` — anything else falls back
+  /// to [fallbackIcon] at render time (icons never load over the network).
   static const knownIcons = {
     'access_point', 'apple', 'apple_tv', 'aqi-high', 'aqi-low', 'aqi-medium',
     'arrow-down', 'arrow-up', 'battery', 'bedroom', 'clock', 'close',

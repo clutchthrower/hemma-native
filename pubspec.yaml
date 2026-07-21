@@ -1,5 +1,5 @@
 name: koti
-description: "A new Flutter project."
+description: "A modern Home Assistant native dashboard for older and slower devices."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -59,14 +59,12 @@ dependencies:
   # Reactive state management
   provider: ^6.1.2
 
-  # Bundled vector icons (mask-tinted like the original web dashboard)
-  flutter_svg: ^2.0.17
-
   # Dev-time convenience: load HA_URL / HA_ACCESS_TOKEN from local .env
   flutter_dotenv: ^5.2.1
   image_picker: ^1.2.2
   path_provider: ^2.1.5
   package_info_plus: ^9.0.1
+  url_launcher: ^6.3.1
 
   # Local audio playback for the "tablet as a speaker" feature
   just_audio: ^0.9.42
@@ -95,8 +93,6 @@ flutter:
 
   assets:
     - .env
-    - assets/icons/
-    - assets/weather/
     - assets/rooms/
     - assets/rooms/blur/
     - assets/mobile/
@@ -116,3 +112,6 @@ flutter:
           weight: 800
         - asset: assets/fonts/hanken-grotesk-v12-latin-900.ttf
           weight: 900
+    - family: Material Symbols Rounded
+      fonts:
+        - asset: assets/fonts/MaterialSymbolsRounded.ttf

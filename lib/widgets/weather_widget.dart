@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 import '../models/entity_state.dart';
+import '../store/settings_store.dart';
 import '../widgets/entity_watcher.dart';
+import 'entity_picker.dart';
+import 'koti_icon.dart';
 
-/// Maps a Home Assistant `weather.*` condition string to a bundled SVG in
-/// `assets/weather/` (all 21 states from spec 15.2 collapse onto this
-/// smaller, cleaner icon set).
-String weatherAssetFor(String condition) {
+/// Maps a Home Assistant `weather.*` condition string to a [KotiIcon] name
+/// (all 21 states from spec 15.2 collapse onto this smaller, cleaner icon
+/// set).
+String weatherIconFor(String condition) {
   const map = {
     'clear-night': 'clear-night',
     'cloudy': 'cloudy',
@@ -25,7 +28,51 @@ String weatherAssetFor(String condition) {
     'windy': 'wind',
     'windy-variant': 'wind',
   };
-  return 'assets/weather/${map[condition] ?? 'cloudy'}.svg';
+  return map[condition] ?? 'cloudy';
+}
+
+/// Long-press-to-edit for the Home hero's weather display — the same
+/// pattern `badge_edit_sheet.dart` uses for badges, but a single field, so
+/// it's just a picker rather than a whole sheet. Also editable from Rooms
+/// settings (`rooms_settings_page.dart`), since it's a whole-home setting,
+/// not per-room.
+void showWeatherEntityPicker(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => Padding(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: MediaQuery.viewInsetsOf(context).bottom + 20,
+      ),
+      child: Consumer<SettingsStore>(
+        builder: (context, settings, _) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Weather', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 16),
+            EntityPickerField(
+              label: 'Weather entity',
+              value: settings.weatherEntityId,
+              domains: const ['weather'],
+              onChanged: settings.setWeatherEntityId,
+            ),
+            const SizedBox(height: 20),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Done'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 /// First `weather.*` entity's condition + temperature, per spec's weather
@@ -66,11 +113,10 @@ class WeatherWidget extends StatelessWidget {
                   ),
             ),
             const SizedBox(width: 6),
-            SvgPicture.asset(
-              weatherAssetFor(weather.state),
-              width: iconSize,
-              height: iconSize,
-              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            KotiIcon(
+              weatherIconFor(weather.state),
+              size: iconSize,
+              color: Colors.white,
             ),
           ],
         );

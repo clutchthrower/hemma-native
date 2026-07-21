@@ -143,6 +143,7 @@ class _BackgroundSheetState extends State<_BackgroundSheet> {
                           image: DecorationImage(
                             image: AssetImage('assets/rooms/blur/$base.jpg'),
                             fit: BoxFit.cover,
+                            filterQuality: FilterQuality.high,
                           ),
                         ),
                       ),
