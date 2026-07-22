@@ -28,7 +28,7 @@ v
 
 ## Hemma Visual Design Translations
 To preserve the Apple-Home inspired aesthetic of the Hemma repository without causing high CPU spikes on legacy hardware, the following design translation rules apply:
-1. **No Real-Time Blurs**: Avoid computationally expensive graphic backdrop filter blurs (`BackdropFilter`). Replicate the "frosted glass" style using solid, translucent container background values (e.g., dark colors with low opacity: `Colors.black.withOpacity(0.4)`).
+1. **Limit Real-Time Blurs**: Limit amount of computationally expensive graphic backdrop filter blurs (`BackdropFilter`). Try to replicate the "frosted glass" style first using solid, translucent container background values (e.g., dark colors with low opacity: `Colors.black.withOpacity(0.4)`).
 2. **Asset Locality**: All room images, graphical templates, layout structures, and icon fonts must reside permanently in the local application bundle folder (`assets/`). No interface files or images may be loaded over Wi-Fi.
 3. **Atomic Repaints**: Implement selective widget rebuilding. When a Home Assistant state change arrives over the WebSocket connection (e.g., `light.living_room` turned on), only that specific button widget should redraw.
 

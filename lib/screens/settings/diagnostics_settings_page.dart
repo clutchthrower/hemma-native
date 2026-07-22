@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import '../../api/ha_websocket_client.dart';
+import '../../popups/popup_base.dart';
 import '../../store/settings_store.dart';
 import '../../store/state_store.dart';
 import '../../theme/koti_theme.dart';
@@ -60,8 +61,8 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
   void _factoryReset(SettingsStore settings) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Reset all settings?'),
+      builder: (context) => KotiAlertDialog(
+        title: 'Reset all settings?',
         content: const Text(
             'This clears your connection, theme, and room configuration. '
             'You\'ll go through setup again next launch. This can\'t be undone.'),
@@ -144,8 +145,8 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
             subtitle: Text('${store.all.length} entities cached'),
             onTap: () => showDialog(
               context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Entity States'),
+              builder: (context) => KotiAlertDialog(
+                title: 'Entity States',
                 content: SizedBox(
                   width: double.maxFinite,
                   height: 400,
@@ -160,6 +161,10 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
                         .toList(),
                   ),
                 ),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(context), child: const Text('Close')),
+                ],
               ),
             ),
           ),

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../theme/koti_theme.dart';
@@ -6,8 +8,12 @@ import '../theme/koti_theme.dart';
 /// calling [context]'s render box): sized to its content, a bit wider than
 /// its parent card, positioned adjacent to it — not a full-width sheet.
 /// Falls back to a centered dialog when the caller has no usable anchor
-/// (e.g. opened from the nav bar). The scrim is a solid low-opacity color,
-/// never a blur.
+/// (e.g. opened from the nav bar). Per CLAUDE.md, a solid translucent
+/// background is tried first; here it wasn't enough on its own to keep
+/// whatever's behind the card (room photo, room title text) from reading
+/// through and blending with the popup's own text, so the card also gets a
+/// real `BackdropFilter` blur — a single static blur region behind one
+/// modal popup at a time, not a continuous/animated cost.
 Future<T?> showKotiPopup<T>(
   BuildContext context, {
   required String title,
@@ -68,31 +74,37 @@ Future<T?> showKotiPopup<T>(
         constraints: BoxConstraints(maxWidth: width, maxHeight: maxHeight),
         child: Material(
           color: Colors.transparent,
-          child: Container(
-            width: width,
-            decoration: BoxDecoration(
-              color: tokens.dialogBackground,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontFamily: 'Hanken Grotesk',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: tokens.textPrimary,
-                  ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+              child: Container(
+                width: width,
+                decoration: BoxDecoration(
+                  color: tokens.dialogBackground,
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                const SizedBox(height: 10),
-                Flexible(
-                  child: SingleChildScrollView(child: Builder(builder: builder)),
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontFamily: 'Hanken Grotesk',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 18,
+                        color: tokens.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Flexible(
+                      child: SingleChildScrollView(child: Builder(builder: builder)),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -117,4 +129,80 @@ Future<T?> showKotiPopup<T>(
       );
     },
   );
+}
+
+/// A `showDialog` confirm/detail dialog in the same glass-blurred style as
+/// [showKotiPopup], instead of Flutter's stock `AlertDialog` — left
+/// undecorated, that falls back to `ColorScheme.surface` (the warm
+/// tan/charcoal this app uses for ordinary opaque surfaces, not the
+/// translucent-blurred look every other popup in the app has). Same
+/// title/content/actions shape as `AlertDialog` so call sites barely
+/// change.
+class KotiAlertDialog extends StatelessWidget {
+  final String title;
+  final Widget content;
+  final List<Widget> actions;
+
+  const KotiAlertDialog({
+    super.key,
+    required this.title,
+    required this.content,
+    required this.actions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = KotiTheme.of(context);
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 420),
+            decoration: BoxDecoration(
+              color: tokens.dialogBackground,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontFamily: 'Hanken Grotesk',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                    color: tokens.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Flexible(
+                  child: DefaultTextStyle(
+                    style: TextStyle(color: tokens.textSecondary, fontSize: 14),
+                    child: content,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    for (var i = 0; i < actions.length; i++) ...[
+                      if (i > 0) const SizedBox(width: 8),
+                      actions[i],
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

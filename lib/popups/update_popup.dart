@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../api/app_update.dart';
+import 'popup_base.dart';
 
 /// The Settings-reached update flow: a plain confirm dialog ("Update
 /// available, want it?"), then — only if the user says yes — a second
@@ -17,8 +18,8 @@ Future<void> showUpdatePopup(
 }) async {
   final proceed = await showDialog<bool>(
     context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Update Available'),
+    builder: (context) => KotiAlertDialog(
+      title: 'Update Available',
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,8 +94,8 @@ class _UpdateProgressDialogState extends State<_UpdateProgressDialog> {
   @override
   Widget build(BuildContext context) {
     final downloading = _progress != null;
-    return AlertDialog(
-      title: const Text('Updating Koti'),
+    return KotiAlertDialog(
+      title: 'Updating Koti',
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

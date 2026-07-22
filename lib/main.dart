@@ -288,11 +288,13 @@ class _KotiAppState extends State<KotiApp> with WidgetsBindingObserver {
             primary: tokens.accentColor,
             onPrimary: Colors.white,
             secondary: tokens.accentColor,
-            // Warm brown-charcoal / warm off-white instead of a cold
-            // near-black / near-white — harmonizes with the tan splash and
-            // brand color instead of reading as a generic dark UI.
-            surface: tokens.isDark ? const Color(0xFF211D18) : const Color(0xFFF6F2EC),
-            onSurface: tokens.isDark ? Colors.white : const Color(0xFF241F19),
+            // Neutral gray — hemma_glass.yaml's real primary-background-color
+            // (rgb(40,40,40) dark) — not the warm brown/tan this used to be,
+            // which is what every plain Scaffold-based settings page (no
+            // photo behind it to read as "glass" against) was actually
+            // showing as its solid background.
+            surface: tokens.isDark ? const Color(0xFF282828) : const Color(0xFFF2F2F2),
+            onSurface: tokens.isDark ? Colors.white : const Color(0xFF1A1A1A),
           );
 
           return KotiTheme(
