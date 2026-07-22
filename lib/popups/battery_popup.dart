@@ -21,10 +21,10 @@ void showBatteryPopup(BuildContext context, List<String>? entityFilter, int lowT
         ..sort((a, b) =>
             (double.tryParse(a.state) ?? 100).compareTo(double.tryParse(b.state) ?? 100));
 
-      final critical = batteries.where((e) => (double.tryParse(e.state) ?? 100) < 20).length;
+      final critical = batteries.where((e) => (double.tryParse(e.state) ?? 100) <= 10).length;
       final low = batteries.where((e) {
         final v = double.tryParse(e.state) ?? 100;
-        return v >= 20 && v < 50;
+        return v > 10 && v <= 20;
       }).length;
       final good = batteries.length - critical - low;
 
@@ -36,11 +36,7 @@ void showBatteryPopup(BuildContext context, List<String>? entityFilter, int lowT
           const SizedBox(height: 12),
           ...batteries.map((e) {
             final level = double.tryParse(e.state) ?? 0;
-            final color = level < 20
-                ? kSeverityColors[SeverityTier.critical]!
-                : level < 50
-                    ? kSeverityColors[SeverityTier.warning]!
-                    : kSeverityColors[SeverityTier.good]!;
+            final color = colorForBattery(level);
             return ListTile(
               title: Text(e.attr<String>('friendly_name', e.entityId),
                   style: TextStyle(color: tokens.textPrimary)),

@@ -50,16 +50,42 @@ Color colorForHumidity(double percent) =>
     kHumidityColors[humidityColorTier(percent)]!;
 
 /// A single good→critical color ramp, shared by every value-to-color popup
-/// that isn't temperature/humidity (AQI, battery level, wattage, network
-/// restart state) — these used to each declare their own copy of the same
-/// four hex values independently; each caller still owns its own
-/// thresholds (a battery's "low" cutoff isn't a wattage's), only the colors
-/// themselves are shared here.
+/// that isn't temperature/humidity (AQI, wattage, network restart state) —
+/// these used to each declare their own copy of the same four hex values
+/// independently; each caller still owns its own thresholds, only the
+/// colors themselves are shared here. Values are the real ones resolved
+/// from `hemma-popup-green/yellow/orange/red-color` in `hemma_glass.yaml`
+/// (its `var(--x, fallback)` fallback hexes are vestigial — `--x` is always
+/// defined, so the fallback never actually renders; these are what's
+/// really on screen), not the placeholder hexes an earlier pass here
+/// invented without checking the original theme source.
 enum SeverityTier { good, warning, elevated, critical }
 
 const Map<SeverityTier, Color> kSeverityColors = {
-  SeverityTier.good: Color(0xFF63C58B),
-  SeverityTier.warning: Color(0xFFE8C34F),
-  SeverityTier.elevated: Color(0xFFE8934F),
-  SeverityTier.critical: Color(0xFFE85D4F),
+  SeverityTier.good: Color(0xFF67F5A0), // hemma-color-green-soft
+  SeverityTier.warning: Color(0xFFFFCC00), // hemma-color-yellow
+  SeverityTier.elevated: Color(0xFFFF9230), // hemma-color-orange
+  SeverityTier.critical: Color(0xFFFF4245), // hemma-color-red
 };
+
+/// Battery specifically uses a different, more saturated green for "good"
+/// than the general severity ramp above (`hemma_popup_battery.yaml` hardcodes
+/// `#44e371` directly rather than referencing `hemma-popup-green-color`),
+/// at its own thresholds (≤10% critical, ≤20% low) — distinct enough from
+/// the general ramp to need its own small map rather than borrowing
+/// [kSeverityColors].
+enum BatteryTier { critical, low, good }
+
+BatteryTier batteryTier(double percent) {
+  if (percent <= 10) return BatteryTier.critical;
+  if (percent <= 20) return BatteryTier.low;
+  return BatteryTier.good;
+}
+
+const Map<BatteryTier, Color> kBatteryColors = {
+  BatteryTier.critical: Color(0xFFFF4245), // hemma-color-red
+  BatteryTier.low: Color(0xFFFF9230), // hemma-color-orange
+  BatteryTier.good: Color(0xFF44E371), // hemma-color-green
+};
+
+Color colorForBattery(double percent) => kBatteryColors[batteryTier(percent)]!;

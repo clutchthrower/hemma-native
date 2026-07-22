@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../store/helper_store.dart';
+import '../theme/tokens.dart';
 import '../widgets/entity_watcher.dart';
 import 'group_badge.dart';
 
@@ -22,7 +23,8 @@ class LightGroupBadge extends StatelessWidget {
           iconName: 'light',
           label: 'Lights',
           subLabel: onCount > 0 ? '$onCount On' : 'Off',
-          accent: onCount > 0 ? const Color(0xFFFFC531) : Colors.white70,
+          // hemma-badge-light-color
+          accent: onCount > 0 ? const Color(0xFFFFCC00) : KotiTokens.secondaryOnDark,
           onTap: () => helpers.toggleExpandedRow(ExpandedRow.lights),
         );
       },

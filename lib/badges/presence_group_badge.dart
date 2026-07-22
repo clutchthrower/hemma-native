@@ -25,8 +25,9 @@ class PresenceGroupBadge extends StatelessWidget {
         return GroupBadge(
           iconName: 'person',
           label: 'People',
+          // hemma-badge-presence-home-color / -away-color
           subLabel: away == 0 ? 'All Home' : '$away Away',
-          accent: away == 0 ? const Color(0xFF4CD964) : Colors.white70,
+          accent: away == 0 ? const Color(0xD949F08C) : const Color(0xFFFFCC00),
           onTap: () => helpers.toggleExpandedRow(ExpandedRow.presence),
         );
       },

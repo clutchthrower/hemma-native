@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../store/helper_store.dart';
+import '../theme/tokens.dart';
 import '../widgets/entity_watcher.dart';
 import 'group_badge.dart';
 
@@ -45,7 +46,8 @@ class MediaGroupBadge extends StatelessWidget {
           subLabel: activeCount == 0
               ? '${mediaPlayerEntityIds.length} Players'
               : '$activeCount Playing',
-          accent: activeCount == 0 ? Colors.white70 : Colors.white,
+          // hemma-badge-media-color
+          accent: activeCount == 0 ? KotiTokens.secondaryOnDark : const Color(0xFFFF4D70),
           onTap: () => helpers.toggleExpandedRow(ExpandedRow.media),
         );
       },
