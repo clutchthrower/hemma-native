@@ -10,6 +10,15 @@ Discovers players two ways:
   repo's own `custom_components/koti` integration (filtered by `platform == "koti"`).
 - Manually, by `host:port` — no Home Assistant involvement at all.
 
+These are alternatives for the same tablet, not meant to be combined — pick whichever
+fits your setup, not both. Both paths register the player under the tablet's own
+self-reported `deviceID` (from its `deviceInfo` REST response), so configuring the same
+physical tablet both ways now resolves to one player instead of two; before this, the HA
+path keyed its player on the HA entity_id while the manual path keyed on `deviceID`,
+so the same tablet configured both ways registered as two distinct MA players — which is
+what was actually producing the duplicate `media_player.*` entities MA then mirrored back
+into Home Assistant.
+
 ## Status
 
 Not merged upstream. For now this is deployed locally into one real Home Assistant OS

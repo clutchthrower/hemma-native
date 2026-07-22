@@ -154,8 +154,16 @@ class KotiProvider(PlayerProvider):
                 dev_info["manufacturer"] = manufacturer
             if sw_version := hass_device.get("sw_version"):
                 dev_info["software_version"] = sw_version
-        # Create and register the player
-        player = KotiPlayer(self, entity_id, client, f"{host}:{port}", dev_info)
+        # Use the tablet's own self-reported device ID as the player_id —
+        # the same value _setup_manual_player derives — rather than the HA
+        # entity_id. If a user configures the same physical tablet both via
+        # HA discovery and a manual address, this makes both paths resolve
+        # to the identical player_id (MA registers it once, idempotently)
+        # instead of creating two distinct players for one device, which is
+        # what was actually producing the duplicate media_player entities
+        # mirrored back into HA.
+        player_id = client.device_info.get("deviceID", entity_id)
+        player = KotiPlayer(self, player_id, client, f"{host}:{port}", dev_info)
         player.set_attributes()
         await self.mass.players.register(player)
         return True
