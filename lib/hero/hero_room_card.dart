@@ -11,6 +11,8 @@ import '../edit/badge_edit_sheet.dart';
 import '../edit/edit_mode.dart';
 import '../models/room_config.dart';
 import '../popups/climate_popup.dart';
+import '../popups/popup_base.dart';
+import '../popups/weather_popup.dart';
 import '../store/settings_store.dart';
 import '../theme/koti_theme.dart';
 import '../utils/device_mode.dart';
@@ -281,7 +283,9 @@ class _HeroRoomCardState extends State<HeroRoomCard>
               if (!portrait && settings.weatherEntityId != null)
                 GestureDetector(
                   onLongPress: canEdit && !editing ? edit.enter : null,
-                  onTap: editing ? () => showWeatherEntityPicker(context) : null,
+                  onTap: editing
+                      ? () => showWeatherEntityPicker(context)
+                      : () => showWeatherForecastPopup(context, settings.weatherEntityId!),
                   child: WeatherWidget(
                     weatherEntityId: settings.weatherEntityId!,
                     iconSize: 26,
@@ -331,7 +335,10 @@ class _HeroRoomCardState extends State<HeroRoomCard>
                       padding: const EdgeInsets.only(top: 12),
                       child: GestureDetector(
                         onLongPress: canEdit && !editing ? edit.enter : null,
-                        onTap: editing ? () => showWeatherEntityPicker(context) : null,
+                        onTap: editing
+                            ? () => showWeatherEntityPicker(context)
+                            : () => showWeatherForecastPopup(
+                                context, settings.weatherEntityId!),
                         child: WeatherWidget(
                           weatherEntityId: settings.weatherEntityId!,
                           iconSize: 24,
@@ -405,8 +412,8 @@ class _RenameRoomDialogState extends State<_RenameRoomDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Room Name'),
+    return KotiAlertDialog(
+      title: 'Room Name',
       content: TextField(controller: _controller, autofocus: true),
       actions: [
         TextButton(
