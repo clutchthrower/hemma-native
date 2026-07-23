@@ -6,8 +6,10 @@ import 'package:provider/provider.dart';
 
 import '../../speaker/koti_player_server.dart';
 import '../../store/settings_store.dart';
+import '../../store/state_store.dart';
 import '../../widgets/entity_picker.dart';
 import '../../widgets/koti_switch.dart';
+import '../music/music_players_popup.dart' show availablePlayerIds, dedupedPlayerIds;
 
 /// Combines the "Music Assistant" page toggle with the "tablet as a
 /// speaker" setup that only matters once it's on — one settings
@@ -22,11 +24,23 @@ class MusicAssistantSettingsPage extends StatefulWidget {
 
 class _MusicAssistantSettingsPageState extends State<MusicAssistantSettingsPage> {
   String? _localIp;
+  Future<Set<String>>? _hiddenSpeakerIds;
 
   @override
   void initState() {
     super.initState();
     _lookupIp();
+  }
+
+  // Same duplicate-hiding Music Assistant mirroring produces in the Music
+  // tab's own player popup (see dedupedPlayerIds) — this picker is a
+  // separate widget with its own candidate list, so without this it showed
+  // every raw media_player duplicate MA mirrors alongside a device's native
+  // entity.
+  Future<Set<String>> _computeHiddenSpeakerIds(StateStore store) async {
+    final all = availablePlayerIds(store);
+    final deduped = await dedupedPlayerIds(store, all);
+    return all.toSet().difference(deduped.toSet());
   }
 
   Future<void> _lookupIp() async {
@@ -58,6 +72,8 @@ class _MusicAssistantSettingsPageState extends State<MusicAssistantSettingsPage>
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsStore>();
     final port = KotiPlayerServer.defaultPort.toString();
+    final stateStore = Provider.of<StateStore>(context, listen: false);
+    _hiddenSpeakerIds ??= _computeHiddenSpeakerIds(stateStore);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Music Assistant')),
@@ -132,12 +148,16 @@ class _MusicAssistantSettingsPageState extends State<MusicAssistantSettingsPage>
                   'below so the Music page defaults to controlling this tablet.',
                 ),
               ),
-              EntityPickerField(
-                label: 'This tablet\'s speaker entity',
-                value: settings.selfSpeakerEntityId,
-                domains: const ['media_player'],
-                excludeUnavailable: true,
-                onChanged: settings.setSelfSpeakerEntityId,
+              FutureBuilder<Set<String>>(
+                future: _hiddenSpeakerIds,
+                builder: (context, snapshot) => EntityPickerField(
+                  label: 'This tablet\'s speaker entity',
+                  value: settings.selfSpeakerEntityId,
+                  domains: const ['media_player'],
+                  excludeUnavailable: true,
+                  excludeIds: snapshot.data,
+                  onChanged: settings.setSelfSpeakerEntityId,
+                ),
               ),
             ],
           ],

@@ -31,7 +31,19 @@ class KotiPlayerServer {
   String name;
   final int port;
 
-  KotiPlayerServer({required this.id, required this.name, this.port = defaultPort});
+  KotiPlayerServer({required this.id, required this.name, this.port = defaultPort}) {
+    // Only an explicit stopSound cleared `_currentUrl` — a track that
+    // finishes on its own left it set forever, so `soundUrlPlaying` (and
+    // therefore the HA entity's and MA player's derived playback state)
+    // never went back to idle. Both then kept extrapolating elapsed time
+    // forward from the last known position while "still playing", which is
+    // what showed up as playtime counting up past the track's own duration.
+    _player.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        _currentUrl = null;
+      }
+    });
+  }
 
   HttpServer? _server;
   final AudioPlayer _player = AudioPlayer();

@@ -45,7 +45,7 @@ List<String> availablePlayerIds(StateStore store) {
 /// entity as a player either (it's not Music-Assistant-controllable), so
 /// that kind of duplicate needs resolving directly in HA (Settings →
 /// Devices & services → Entities → disable the one you don't want to see).
-Future<List<String>> _dedupedPlayerIds(StateStore store, List<String> candidateIds) async {
+Future<List<String>> dedupedPlayerIds(StateStore store, List<String> candidateIds) async {
   List<Map<String, dynamic>> registry;
   try {
     registry = await store.getEntityRegistry();
@@ -110,7 +110,7 @@ class _PlayersListState extends State<_PlayersList> {
   // registry itself doesn't change while this is on screen, and
   // recomputing on every entity-state tick would just redo the same work.
   late final Future<List<String>> _dedupedIds =
-      _dedupedPlayerIds(widget.store, availablePlayerIds(widget.store));
+      dedupedPlayerIds(widget.store, availablePlayerIds(widget.store));
 
   @override
   Widget build(BuildContext context) {
