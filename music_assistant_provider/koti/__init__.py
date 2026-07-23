@@ -44,20 +44,19 @@ async def get_config_entries(
 ) -> tuple[ConfigEntry, ...]:
     """Return Config entries to setup this provider."""
     hass_prov = cast("HomeAssistantProvider|None", mass.get_provider(HASS_DOMAIN))
-    player_entities: list[ConfigValueOption] = []
+    koti_devices: list[ConfigValueOption] = []
     if hass_prov and hass_prov.hass.connected:
-        entity_registry = {x["entity_id"]: x for x in await hass_prov.hass.get_entity_registry()}
-        for state in await hass_prov.hass.get_states():
-            if not state["entity_id"].startswith("media_player"):
+        # The Koti HA integration registers a device with its own direct-
+        # control media_player.koti_{name} entity (see
+        # custom_components/koti/media_player.py), but this dropdown finds
+        # it via the device registry directly rather than scanning entities
+        # — this provider creates its own separate player for Music
+        # Assistant control, independent of that entity.
+        for device in await hass_prov.hass.get_device_registry():
+            if not any(domain == KOTI_HA_DOMAIN for domain, _ in device["identifiers"]):
                 continue
-            if "friendly_name" not in state["attributes"]:
-                continue
-            # Only show entities from the Koti HA integration
-            entity_entry = entity_registry.get(state["entity_id"])
-            if not entity_entry or entity_entry.get("platform") != KOTI_HA_DOMAIN:
-                continue
-            name = f"{state['attributes']['friendly_name']} ({state['entity_id']})"
-            player_entities.append(ConfigValueOption(name, state["entity_id"]))
+            name = f"{device['name']} ({device['id']})"
+            koti_devices.append(ConfigValueOption(name, device["id"]))
     return (
         ConfigEntry(
             key=CONF_PLAYERS,
@@ -65,7 +64,8 @@ async def get_config_entries(
             multi_value=True,
             label="Koti devices (via Home Assistant)",
             required=False,
-            options=player_entities,
+            default_value=[],
+            options=koti_devices,
             description="Select Koti tablets discovered through the Koti HA "
             "integration. Requires the Home Assistant Plugin.",
         ),
@@ -75,6 +75,7 @@ async def get_config_entries(
             multi_value=True,
             label="Manual Koti addresses",
             required=False,
+            default_value=[],
             description="Manually add Koti tablets by IP address and port "
             "(e.g. 192.168.1.100:8127). Use this if you don't have the Koti "
             "HA integration installed.",

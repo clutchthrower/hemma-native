@@ -6,8 +6,11 @@ modeled directly on `music_assistant/providers/dashie_kiosk/` — Koti's tablet 
 protocol Dashie's does, so this provider is close to a rename of theirs.
 
 Discovers players two ways:
-- Via the Home Assistant Plugin: reads `configuration_url` off devices registered by this
-  repo's own `custom_components/koti` integration (filtered by `platform == "koti"`).
+- Via the Home Assistant Plugin: reads `configuration_url` straight off devices registered
+  by this repo's own `custom_components/koti` integration — found via the device registry's
+  own `identifiers`, not that integration's `media_player.koti_{name}` entity (this provider
+  doesn't need or touch it; the two exist independently for two different purposes — direct
+  REST control vs. full Music Assistant control).
 - Manually, by `host:port` — no Home Assistant involvement at all.
 
 These are alternatives for the same tablet, not meant to be combined — pick whichever

@@ -10,13 +10,14 @@ from homeassistant.components.media_player import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
 from .coordinator import KotiCoordinator
+from .mac import mac_from
 
 SUPPORTED_FEATURES = (
     MediaPlayerEntityFeature.PLAY_MEDIA
@@ -40,25 +41,35 @@ async def async_setup_entry(
 class KotiMediaPlayer(CoordinatorEntity[KotiCoordinator], MediaPlayerEntity):
     """A Koti tablet acting as a Music Assistant player."""
 
-    # Music Assistant's own "Fully Kiosk Browser" player (the recommended
-    # setup — see Settings -> Speaker in the app) names its player entity
-    # after this same device's reported name, with no entity-name suffix.
-    # Leaving this one unnamed too would make HA register both under the
-    # same entity_id base and disambiguate with an opaque "_2", which reads
-    # as an accidental duplicate rather than the two intentionally-separate
-    # entities they are.
-    _attr_has_entity_name = True
-    _attr_name = "Direct Control"
+    # Music Assistant's own player (either its built-in "Fully Kiosk Browser"
+    # provider, or the Koti player provider) names its mirrored HA entity
+    # after this same device's reported name (deviceName), with no prefix.
+    # Explicitly naming this one "Koti {name}" instead of leaving it
+    # has_entity_name-unnamed keeps it out of that same entity_id slug
+    # entirely — media_player.koti_{name} vs. MA's media_player.{name} —
+    # so the two read as clean, distinctly-purposed entities (direct REST
+    # control vs. full Music Assistant control) instead of one looking like
+    # an accidental duplicate of the other with an opaque "_2", or a
+    # confusing "Direct Control" suffix bolted onto the device's own name.
+    _attr_has_entity_name = False
     _attr_supported_features = SUPPORTED_FEATURES
     _attr_media_content_type = MediaType.MUSIC
 
     def __init__(self, coordinator: KotiCoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator)
         self._entry = entry
+        device_name = entry.data.get("name", entry.title)
+        self._attr_name = f"Koti {device_name}"
         self._attr_unique_id = entry.unique_id
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.unique_id)},
-            name=entry.data.get("name", entry.title),
+            # Same MAC the tablet's ESPHome Bluetooth-proxy registration
+            # uses — sharing a `connections` entry is how Home Assistant's
+            # device registry recognizes this and the ESPHome device as the
+            # same physical tablet and merges them into one Device instead
+            # of two.
+            connections={(CONNECTION_NETWORK_MAC, mac_from(entry.unique_id))},
+            name=device_name,
             manufacturer="Koti",
             model="Koti Tablet",
             # Read by the Koti Music Assistant player provider to find this

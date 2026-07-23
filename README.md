@@ -25,11 +25,12 @@ hardware as old as Android 7.0 (API 24).
   ESPHome Bluetooth proxy.
 - **Tablet as a speaker**: turn the tablet into a Music Assistant player. It speaks the
   Fully Kiosk Browser REST protocol, so Music Assistant's built-in "Fully Kiosk Browser"
-  player provider can control it directly (Settings → Speaker shows the host/port to add).
-  Separately, it also advertises itself on the LAN (mDNS) so the
-  [Koti integration](custom_components/koti) auto-creates a plain HA `media_player` entity
-  for it with no setup — that part is zero-config, but Music Assistant itself still needs
-  the manual add above until a native "Koti" MA player provider exists upstream.
+  player provider can control it directly (Settings → Speaker shows the host/port to add),
+  or the [Koti MA player provider](music_assistant_provider/koti) can add it automatically —
+  it discovers tablets via the [Koti HA integration](custom_components/koti), which
+  auto-registers each tablet as a zero-config HA device with its own direct-control
+  `media_player.koti_{name}` entity, distinctly named so it never collides with whatever
+  entity Music Assistant itself creates for the same tablet.
 - **Wall-tablet niceties**: fullscreen mode, launcher (home-app) mode, screensaver with
   clock/weather and burn-in protection (including a DVD-logo bounce), device brightness
   control, and in-app updates from GitHub Releases.

@@ -6,7 +6,7 @@
         "description": "Found a Koti tablet, \"{name}\", on your network. Add it as a media player?"
       },
       "user": {
-        "title": "Add a Koti player manually",
+        "title": "Add a Koti tablet manually",
         "description": "Only needed if auto-discovery didn't find your tablet. Enter its IP address (Settings → Device Name in the Koti app shows the tablet's own name).",
         "data": {
           "host": "Host or IP address",
@@ -19,7 +19,8 @@
     },
     "abort": {
       "already_configured": "This Koti player is already configured.",
-      "no_device_id": "The discovered device didn't report an id."
+      "no_device_id": "The discovered device didn't report an id.",
+      "no_host": "The discovered device didn't report a usable address."
     }
   }
 }
